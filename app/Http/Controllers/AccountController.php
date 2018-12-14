@@ -32,17 +32,26 @@ class AccountController extends Controller
      */
     public function index(AccountFilterRequest $request)
     {
-        $noOfRecords    = !empty($request->get('no_of_records')) ? $request->get('no_of_records') : $this->noOfRecordsPerPage;
+        $noOfRecords = !empty($request->get('no_of_records')) ? $request->get('no_of_records') : $this->noOfRecordsPerPage;
 
-        $params = [
-            'relation'      => $request->get('relation_type'),
-            'id'            => $request->get('account_id'),
+        $whereParams = [
+            'relation_type' => [
+                'paramName'     => 'relation',
+                'paramOperator' => '=',
+                'paramValue'    => $request->get('relation_type'),
+            ],
+            'account_id' => [
+                'paramName'     => 'id',
+                'paramOperator' => '=',
+                'paramValue'    => $request->get('account_id'),
+            ],
         ];
         
+        //getAccounts($whereParams=[],$orWhereParams=[],$relationalParams=[],$orderBy=['by' => 'id', 'order' => 'asc', 'num' => null], $withParams=[],$activeFlag=true)
         return view('accounts.list', [
-            'accounts'      => $this->accountRepo->getAccounts($params, $noOfRecords, true, false),
+            'accounts'      => $this->accountRepo->getAccounts($whereParams, [], [], ['by' => 'id', 'order' => 'asc', 'num' => $noOfRecords], [], true),
             'relationTypes' => config('constants.accountRelationTypes'),
-            'params'        => $params,
+            'params'        => $whereParams,
             'noOfRecords'   => $noOfRecords,
         ]);
     }
@@ -55,12 +64,13 @@ class AccountController extends Controller
     public function create()
     {
         $relationTypes = config('constants.accountRelationTypes');
+        $employeeRelationType = array_search('Employees', config('constants.accountRelationTypes')); //employee -> [index = 1]
         //excluding the relationtype 'employee'[index = 1] for new account registration
-        unset($relationTypes[1]);
+        unset($relationTypes[$employeeRelationType]);
 
         return view('accounts.register', [
-                'relationTypes' => $relationTypes,
-            ]);
+            'relationTypes' => $relationTypes,
+        ]);
     }
 
     /**
@@ -74,10 +84,9 @@ class AccountController extends Controller
         TransactionRepository $transactionRepo,
         $id=null
     ) {
-        $saveFlag           = false;
-        $errorCode          = 0;
-        $account            = null;
-        $accountTransaction = null;
+        $errorCode            = 0;
+        $account              = null;
+        $openingTransactionId = null;
 
         $openingBalanceAccountId = config('constants.accountConstants.AccountOpeningBalance.id');
 
@@ -85,26 +94,15 @@ class AccountController extends Controller
         $openingBalance     = $request->get('opening_balance');
         $name               = $request->get('name');
 
-        $destination    = '/images/accounts/'; // image file upload path
-        $fileName       = "";
-
-        //upload image
-        if ($request->hasFile('image_file')) {
-            $file       = $request->file('image_file');
-            $extension  = $file->getClientOriginalExtension(); // getting image extension
-            $fileName   = $name.'_'.time().'.'.$extension; // renaming image
-            $file->move(public_path().$destination, $fileName); // uploading file to given path
-            $fileName   = $destination.$fileName;//file name for saving to db
-        }
-
         //wrappin db transactions
         DB::beginTransaction();
         try {
             //confirming opening balance existency.
-            $openingBalanceAccount = $this->accountRepo->getAccount($openingBalanceAccountId);
+            //getAccount($id, $withParams=[], $activeFlag=true)
+            $openingBalanceAccount = $this->accountRepo->getAccount($openingBalanceAccountId, [], false);
 
             if(!empty($id)) {
-                $account = $this->accountRepo->getAccount($id);
+                $account = $this->accountRepo->getAccount($id, [], false);
 
                 if($account->financial_status == 2){
                     $searchTransaction = [
@@ -118,7 +116,8 @@ class AccountController extends Controller
                     ];
                 }
 
-                $accountTransaction = $transactionRepo->getTransactions($searchTransaction)->first();
+                //getTransactions($whereParams=[],$orWhereParams=[],$relationalParams=[],$orderBy=['by' => 'id', 'order' => 'asc', 'num' => null],$withParams=[],$relation,$activeFlag=true)
+                $openingTransactionId = $transactionRepo->getTransactions($searchTransaction, [], [], ['by' => 'id', 'order' => 'asc', 'num' => 1], [], null, false )->id;
             }
 
             //save to account table
@@ -131,28 +130,27 @@ class AccountController extends Controller
                 'name'              => $name,
                 'phone'             => $request->get('phone'),
                 'address'           => $request->get('address'),
-                'image'             => $fileName,
                 'status'            => 1,
-            ], $account);
+            ], $id);
 
-            if($accountResponse['flag']) {
-                //opening balance transaction details
-                if($financialStatus == 1) { //incoming [account holder gives cash to company] [Creditor]
-                    $debitAccountId     = $openingBalanceAccountId; //cash flow into the opening balance account
-                    $creditAccountId    = $accountResponse['id']; //newly created account id [flow out from new account]
-                    $particulars        = "Opening balance of ". $name . " - Debit [Creditor]";
-                } else if($financialStatus == 2){ //outgoing [company gives cash to account holder] [Debitor]
-                    $debitAccountId     = $accountResponse['id']; //newly created account id [flow into new account]
-                    $creditAccountId    = $openingBalanceAccountId; //flow out from the opening balance account
-                    $particulars        = "Opening balance of ". $name . " - Credit [Debitor]";
-                } else {
-                    $debitAccountId     = $openingBalanceAccountId;
-                    $creditAccountId    = $accountResponse['id']; //newly created account id
-                    $particulars        = "Opening balance of ". $name . " - None";
-                    $openingBalance     = 0;
-                }
-            } else {
+            if(!$accountResponse['flag']) {
                 throw new AppCustomException("CustomError", $accountResponse['errorCode']);
+            }
+
+            //opening balance transaction details
+            if($financialStatus == 1) { //incoming [account holder gives cash to company] [Creditor]
+                $debitAccountId     = $openingBalanceAccountId; //cash flow into the opening balance account
+                $creditAccountId    = $accountResponse['id']; //newly created account id [flow out from new account]
+                $particulars        = "Opening balance of ". $name . " - Debit [Creditor]";
+            } else if($financialStatus == 2){ //outgoing [company gives cash to account holder] [Debitor]
+                $debitAccountId     = $accountResponse['id']; //newly created account id [flow into new account]
+                $creditAccountId    = $openingBalanceAccountId; //flow out from the opening balance account
+                $particulars        = "Opening balance of ". $name . " - Credit [Debitor]";
+            } else {
+                $debitAccountId     = $openingBalanceAccountId;
+                $creditAccountId    = $accountResponse['id']; //newly created account id
+                $particulars        = "Opening balance of ". $name . " - None";
+                $openingBalance     = 0;
             }
 
             //save to transaction table
@@ -162,36 +160,27 @@ class AccountController extends Controller
                 'amount'            => $openingBalance,
                 'transaction_date'  => Carbon::now()->format('Y-m-d'),
                 'particulars'       => $particulars,
-                'branch_id'         => 0,
-            ], $accountTransaction);
+            ], $openingTransactionId);
 
             if(!$transactionResponse['flag']) {
                 throw new AppCustomException("CustomError", $transactionResponse['errorCode']);
             }
 
             DB::commit();
-            $saveFlag = true;
+            
+            if(!empty($id)) {
+                return [
+                    'flag'  => true,
+                    'id'    => $accountResponse['account']->id
+                ];
+            }
+            return redirect(route('account.show', $accountResponse['account']->id))->with("message","Account details saved successfully. Reference Number : ". $accountResponse['account']->id)->with("alert-class", "success");
         } catch (Exception $e) {
             //roll back in case of exceptions
             DB::rollback();
 
-            if($e->getMessage() == "CustomError") {
-                $errorCode = $e->getCode();
-            } else {
-                $errorCode = 1;
-            }
+            $errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : 1);
         }
-
-        if($saveFlag) {
-            if(!empty($id)) {
-                return [
-                    'flag'  => true,
-                    'id'    => $accountResponse['id']
-                ];
-            }
-            return redirect(route('account.show', $accountResponse['id']))->with("message","Account details saved successfully. Reference Number : ". $accountResponse['id'])->with("alert-class", "success");
-        }
-
         if(!empty($id)) {
             return [
                 'flag'          => false,
@@ -214,13 +203,10 @@ class AccountController extends Controller
         $account    = [];
 
         try {
-            $account = $this->accountRepo->getAccount($id, false);
+            $account = $this->accountRepo->getAccount($id, [], false);
         } catch (\Exception $e) {
-            if($e->getMessage() == "CustomError") {
-                $errorCode = $e->getCode();
-            } else {
-                $errorCode = 2;
-            }
+            $errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : 2);
+
             //throwing model not found exception when no model is fetched
             throw new ModelNotFoundException("Account", $errorCode);
         }
@@ -243,18 +229,15 @@ class AccountController extends Controller
         $errorCode  = 0;
         $account    = [];
 
-        $relationTypes = config('constants.accountRelationTypes');
+        $relationTypes        = config('constants.accountRelationTypes');
+        $employeeRelationType = array_search('Employees', config('constants.accountRelationTypes')); //employee -> [index = 1]
         //excluding the relationtype 'employee'[index = 1] for account update
-        unset($relationTypes[1]);
+        unset($relationTypes[$employeeRelationType]);
 
         try {
-            $account = $this->accountRepo->getAccount($id, false);
+            $account = $this->accountRepo->getAccount($id, [], false);
         } catch (\Exception $e) {
-            if($e->getMessage() == "CustomError") {
-                $errorCode = $e->getCode();
-            } else {
-                $errorCode = 3;
-            }
+            $errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : 3);
             //throwing methodnotfound exception when no model is fetched
             throw new ModelNotFoundException("Account", $errorCode);
         }
@@ -280,7 +263,7 @@ class AccountController extends Controller
         $updateResponse = $this->store($request, $transactionRepo, $id);
 
         if($updateResponse['flag']) {
-            return redirect(route('account.show', $updateResponse['id']))->with("message","Account details updated successfully. Updated Record Number : ". $updateResponse['id'])->with("alert-class", "success");
+            return redirect(route('account.show', $updateResponse['account']->id))->with("message","Account details updated successfully. Updated Record Number : ". $updateResponse['account']->id)->with("alert-class", "success");
         }
         
         return redirect()->back()->with("message","Failed to update the account details. Error Code : ". $this->errorHead. "/". $updateResponse['errorCode'])->with("alert-class", "error");
@@ -295,56 +278,5 @@ class AccountController extends Controller
     public function destroy($id)
     {
         return redirect()->back()->with("message", "Deletion restricted.")->with("alert-class", "error");
-    }
-
-    /**
-     * return the specified resource.
-     *
-     * @param  int  $id
-     * @return json
-     */
-    public function getDetails($id=null, TransactionRepository $transactionRepo)
-    {
-        $oldBalance['debit']    = 0;
-        $oldBalance['credit']   = 0;
-
-        if(empty($id)) {
-            return [
-                'flag'      => false,
-                'message'   => "Invalid param",
-            ];
-        }
-        $errorCode  = 0;
-        $account    = [];
-
-        try {
-            $account    = $this->accountRepo->getAccount($id,false);
-            $oldBalance = $transactionRepo->getOldBalance($id, null, null);
-        } catch (\Exception $e) {
-            if($e->getMessage() == "CustomError") {
-                $errorCode = $e->getCode();
-            } else {
-                $errorCode = 2;
-            }
-            
-            return [
-                'flag'      => false,
-                'message'   => "Record not found".$errorCode,
-            ];
-        }
-
-        return [
-            'flag'      => true,
-            'account'   => [
-                'name'      => $account->name,
-                'phone'     => $account->phone,
-                'address'   => $account->address,
-                'type'      => $account->type,
-            ],
-            'oldBalance' => [
-                'oldDebit'  => $oldBalance['debit'] ?: 0,
-                'oldCredit' => $oldBalance['credit'] ?: 0,
-            ],
-        ];
     }
 }
