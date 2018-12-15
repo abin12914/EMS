@@ -35,7 +35,7 @@
                                                 <option value="">Select wage type</option>
                                                 @if(!empty($wageTypes) && (count($wageTypes) > 0))
                                                     @foreach($wageTypes as $key => $wageType)
-                                                        <option value="{{ $key }}" {{ (old('wage_type') == $key || $params['wage_type'] == $key) ? 'selected' : '' }}>{{ $wageType }}</option>
+                                                        <option value="{{ $key }}" {{ (old('wage_type') == $key || $params['wage_type']['paramValue'] == $key) ? 'selected' : '' }}>{{ $wageType }}</option>
                                                     @endforeach
                                                 @endif
                                             </select>
@@ -46,7 +46,7 @@
                                         <div class="col-md-4">
                                             <label for="employee_id" class="control-label">Employee : </label>
                                             {{-- adding employee select component --}}
-                                            @component('components.selects.employees', ['selectedEmployeeId' => $params['id'], 'selectName' => 'employee_id', 'tabindex' => 2])
+                                            @component('components.selects.employees', ['selectedEmployeeId' => $params['employee_id']['paramValue'], 'selectName' => 'employee_id', 'tabindex' => 2])
                                             @endcomponent
                                             {{-- adding error_message p tag component --}}
                                             @component('components.paragraph.error_message', ['fieldName' => 'employee_id'])

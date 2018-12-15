@@ -96,7 +96,7 @@
                                         <div class="form-group">
                                             <label for="wage" class="col-md-3 control-label"><b style="color: red;">* </b> Wage : </label>
                                             <div class="col-md-9">
-                                                <input type="text" name="wage" class="form-control decimal_number_only" id="wage" placeholder="Monthly salary/wage/piece rate percentage" value="{{ old('wage', $employee->wage_rate) }}" tabindex="6">
+                                                <input type="text" name="wage" class="form-control decimal_number_only" id="wage" placeholder="Monthly salary/wage/piece rate percentage" value="{{ old('wage', $employee->wage) }}" tabindex="6">
                                                 {{-- adding error_message p tag component --}}
                                                 @component('components.paragraph.error_message', ['fieldName' => 'wage'])
                                                 @endcomponent

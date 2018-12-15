@@ -9,7 +9,7 @@ use Exception;
 
 class EmployeeComponentComposer
 {
-    protected $employees = [], $errorHead = null;
+    protected $employees = [];//, $errorHead = null;
 
     /**
      * Create a new employees partial composer.
@@ -23,13 +23,10 @@ class EmployeeComponentComposer
         $this->errorHead    = config('settings.composer_code.EmployeeComponentComposer');
 
         try {
-            $this->employees = $employeeRepo->getEmployees();
+            //getEmployees($whereParams=[],$orWhereParams=[],$relationalParams=[],$orderBy=['by' => 'id', 'order' => 'asc', 'num' => null],$aggregates=['key' => null, 'value' => null],$withParams=[],$activeFlag=true)
+            $this->employees = $employeeRepo->getEmployees([], [],  [], $orderBy=['by' => 'id', 'order' => 'asc', 'num' => null], $aggregates=['key' => null, 'value' => null], $withParams=[], $activeFlag=true);
         } catch (Exception $e) {
-            if($e->getMessage() == "CustomError") {
-                $errorCode = $e->getCode();
-            } else {
-                $errorCode = 1;
-            }
+            //$errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : 1);
             
             //throw new AppCustomException("CustomError", ($this->errorHead + $errorCode));
         }

@@ -9,6 +9,7 @@ use App\Repositories\AccountRepository;
 use App\Http\Requests\ExpenseRegistrationRequest;
 use App\Http\Requests\ExpenseFilterRequest;
 use Carbon\Carbon;
+use Auth;
 use DB;
 use Exception;
 use App\Exceptions\AppCustomException;
@@ -33,53 +34,47 @@ class ExpenseController extends Controller
      */
     public function index(ExpenseFilterRequest $request)
     {
-        $fromDate       = !empty($request->get('from_date')) ? Carbon::createFromFormat('d-m-Y', $request->get('from_date'))->format('Y-m-d') : "";
-        $toDate         = !empty($request->get('to_date')) ? Carbon::createFromFormat('d-m-Y', $request->get('to_date'))->format('Y-m-d') : "";
-        $noOfRecords    = !empty($request->get('no_of_records')) ? $request->get('no_of_records') : $this->noOfRecordsPerPage;
+        $noOfRecords = !empty($request->get('no_of_records')) ? $request->get('no_of_records') : $this->noOfRecordsPerPage;
+        //date format conversion
+        $fromDate    = empty($request->get('from_date')) ?: Carbon::createFromFormat('d-m-Y', $request->get('from_date'))->format('Y-m-d');
+        $toDate      = empty($request->get('to_date')) ?: Carbon::createFromFormat('d-m-Y', $request->get('to_date'))->format('Y-m-d');
 
-        $params = [
-            'from_date'     =>  [
-                                    'paramName'     => 'date',
-                                    'paramOperator' => '>=',
-                                    'paramValue'    => $fromDate,
-                                ],
-            'to_date'       =>  [
-                                    'paramName'     => 'date',
-                                    'paramOperator' => '<=',
-                                    'paramValue'    => $toDate,
-                                ],
-            'branch_id'     =>  [
-                                    'paramName'     => 'branch_id',
-                                    'paramOperator' => '=',
-                                    'paramValue'    => $request->get('branch_id'),
-                                ],
-            'service_id'    =>  [
-                                    'paramName'     => 'service_id',
-                                    'paramOperator' => '=',
-                                    'paramValue'    => $request->get('service_id'),
-                                ],
+        $whereParams = [
+            'from_date' => [
+                'paramName'     => 'date',
+                'paramOperator' => '>=',
+                'paramValue'    => $fromDate,
+            ],
+            'to_date' => [
+                'paramName'     => 'date',
+                'paramOperator' => '<=',
+                'paramValue'    => $toDate,
+            ],
+            'service_id' => [
+                'paramName'     => 'service_id',
+                'paramOperator' => '=',
+                'paramValue'    => $request->get('service_id'),
+            ],
         ];
 
         $relationalParams = [
-            'supplier_account_id'   =>  [
-                                            'relation'      => 'transaction',
-                                            'paramName'     => 'credit_account_id',
-                                            'paramValue'    => $request->get('supplier_account_id'),
-                                        ]
+            'supplier_account_id' => [
+                'relation'      => 'transaction',
+                'paramName'     => 'credit_account_id',
+                'paramOperator' => '=',
+                'paramValue'    => $request->get('supplier_account_id'),
+            ]
         ];
 
-        $expenses       = $this->expenseRepo->getExpenses($params, $relationalParams, $noOfRecords);
-        $totalExpense   = $this->expenseRepo->getExpenses($params, $relationalParams, null)->sum('bill_amount');
-
         //params passing for auto selection
-        $params['from_date']['paramValue'] = $request->get('from_date');
-        $params['to_date']['paramValue'] = $request->get('to_date');
-        $params = array_merge($params, $relationalParams);
+        $whereParams['from_date']['paramValue'] = $request->get('from_date');
+        $whereParams['to_date']['paramValue']   = $request->get('to_date');
         
+        //getExpenses($whereParams=[],$orWhereParams=[],$relationalParams=[],$orderBy=['by' => 'id', 'order' => 'asc', 'num' => null], $withParams=[],$activeFlag=true)
         return view('expenses.list', [
-            'expenses'      => $expenses,
-            'totalExpense'  => $totalExpense,
-            'params'        => $params,
+            'expenses'      => $this->expenseRepo->getExpenses($whereParams, [], $relationalParams, ['by' => 'id', 'order' => 'asc', 'num' => $noOfRecords], [], [], true),
+            'totalExpense'  => $this->expenseRepo->getExpenses($whereParams, [], $relationalParams, [], ['key' => 'sum', 'value' => 'bill_amount'], true),
+            'params'        => array_merge($params, $relationalParams),
             'noOfRecords'   => $noOfRecords,
         ]);
     }
@@ -106,10 +101,7 @@ class ExpenseController extends Controller
         AccountRepository $accountRepo,
         $id=null
     ) {
-        $saveFlag           = false;
         $errorCode          = 0;
-        $expense            = null;
-        $expenseTransaction = null;
 
         $expenseAccountId   = config('constants.accountConstants.ServiceAndExpense.id');
         $transactionDate    = Carbon::createFromFormat('d-m-Y', $request->get('date'))->format('Y-m-d');
@@ -118,21 +110,22 @@ class ExpenseController extends Controller
         //wrappin db transactions
         DB::beginTransaction();
         try {
-            if(!empty($id)) {
-                $expense = $this->expenseRepo->getExpense($id);
-                $expenseTransaction = $transactionRepo->getTransaction($expense->transaction_id);
-            }
+            $user = Auth::user();
+
             //confirming expense account exist-ency.
-            $expenseAccount = $accountRepo->getAccount($expenseAccountId);
+            $expenseAccount = $accountRepo->getAccount($expenseAccountId, [], false);
+            $expense = $accountRepo->getAccount($id, [], false);
 
             //save expense transaction to table
             $transactionResponse   = $transactionRepo->saveTransaction([
                 'debit_account_id'  => $expenseAccountId, // debit the expense account
                 'credit_account_id' => $request->get('supplier_account_id'), // credit the supplier
-                'amount'            => $totalBill ,
+                'amount'            => $totalBill,
                 'transaction_date'  => $transactionDate,
                 'particulars'       => $request->get('description')."[Purchase & Expense]",
-            ], $expenseTransaction);
+                'status'            => 1,
+                'company_id'        => $user->company_id,
+            ], (!empty($expense) ? $expense->transaction_id : null));
 
             if(!$transactionResponse['flag']) {
                 throw new AppCustomException("CustomError", $transactionResponse['errorCode']);
@@ -140,40 +133,33 @@ class ExpenseController extends Controller
 
             //save to expense table
             $expenseResponse = $this->expenseRepo->saveExpense([
-                'transaction_id' => $transactionResponse['id'],
-                'date'           => $transactionDate,
+                'transaction_id' => $transactionResponse['transaction']->id,
+                'expense_date'   => $transactionDate,
+                'excavator_id'   => $request->get('excavator__id'),
                 'service_id'     => $request->get('service_id'),
                 'bill_amount'    => $totalBill,
-            ], $expense);
+                'status'         = 1,
+                'created_by'     = $user->id,
+                'company_id'     = $user->company_id,
+            ], $id);
 
             if(!$expenseResponse['flag']) {
                 throw new AppCustomException("CustomError", $expenseResponse['errorCode']);
             }
+            if(!empty($id)) {
+                return [
+                    'flag'    => true,
+                    'expense' => $expenseResponse['expense']
+                ];
+            }
 
-            DB::commit();
-            $saveFlag = true;
+            return redirect(route('expense.index'))->with("message","Expense details saved successfully. Reference Number : ". $transactionResponse['expense'])->with("alert-class", "success");
         } catch (Exception $e) {
             //roll back in case of exceptions
             DB::rollback();
 
-            if($e->getMessage() == "CustomError") {
-                $errorCode = $e->getCode();
-            } else {
-                $errorCode = 1;
-            }
+            $errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : 1);
         }
-
-        if($saveFlag) {
-            if(!empty($id)) {
-                return [
-                    'flag'  => true,
-                    'id'    => $expenseResponse['id']
-                ];
-            }
-
-            return redirect(route('expense.index'))->with("message","Expense details saved successfully. Reference Number : ". $transactionResponse['id'])->with("alert-class", "success");
-        }
-        
         if(!empty($id)) {
             return [
                 'flag'          => false,
@@ -195,13 +181,10 @@ class ExpenseController extends Controller
         $expense    = [];
 
         try {
-            $expense = $this->expenseRepo->getExpense($id);
+            $expense = $this->expenseRepo->getExpense($id, [], false);
         } catch (\Exception $e) {
-            if($e->getMessage() == "CustomError") {
-                $errorCode = $e->getCode();
-            } else {
-                $errorCode = 2;
-            }
+            $errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : 2);
+            
             //throwing methodnotfound exception when no model is fetched
             throw new ModelNotFoundException("Expense", $errorCode);
         }
@@ -223,13 +206,9 @@ class ExpenseController extends Controller
         $expense    = [];
 
         try {
-            $expense = $this->expenseRepo->getExpense($id);
+            $expense = $this->expenseRepo->getExpense($id, [], false);
         } catch (\Exception $e) {
-            if($e->getMessage() == "CustomError") {
-                $errorCode = $e->getCode();
-            } else {
-                $errorCode = 3;
-            }
+            $errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : 3);
             //throwing methodnotfound exception when no model is fetched
             throw new ModelNotFoundException("Expense", $errorCode);
         }
@@ -255,10 +234,10 @@ class ExpenseController extends Controller
         $updateResponse = $this->store($request, $transactionRepo, $accountRepo, $id);
 
         if($updateResponse['flag']) {
-            return redirect(route('expense.index'))->with("message","Expense details updated successfully. Updated Record Number : ". $updateResponse['id'])->with("alert-class", "success");
+            return redirect(route('expenses.show', $updateResponse['expenses']->id))->with("message","Expenses details updated successfully. Updated Record Number : ". $updateResponse['expenses']->id)->with("alert-class", "success");
         }
         
-        return redirect()->back()->with("message","Failed to update the expense details. Error Code : ". $this->errorHead. "/". $updateResponse['errorCode'])->with("alert-class", "error");
+        return redirect()->back()->with("message","Failed to update the expenses details. Error Code : ". $this->errorHead. "/". $updateResponse['errorCode'])->with("alert-class", "error");
 
     }
 
@@ -270,33 +249,24 @@ class ExpenseController extends Controller
      */
     public function destroy($id)
     {
-        $deleteFlag = false;
         $errorCode  = 0;
 
         //wrapping db transactions
         DB::beginTransaction();
         try {
-            $deleteResponse = $this->expenseRepo->deleteExpense($id);
+            $deleteResponse = $this->expenseRepo->deleteExpense($id, false);
             
             if(!$deleteResponse['flag']) {
                 throw new AppCustomException("CustomError", $deleteResponse['errorCode']);
             }
             
             DB::commit();
-            $deleteFlag = true;
+            return redirect(route('expense.index'))->with("message","Expense details deleted successfully.")->with("alert-class", "success");
         } catch (Exception $e) {
             //roll back in case of exceptions
             DB::rollback();
 
-            if($e->getMessage() == "CustomError") {
-                $errorCode = $e->getCode();
-            } else {
-                $errorCode = 5;
-            }
-        }
-
-        if($deleteFlag) {
-            return redirect(route('expense.index'))->with("message","Expense details deleted successfully.")->with("alert-class", "success");
+            $errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : 5);
         }
         
         return redirect()->back()->with("message","Failed to delete the expense details. Error Code : ". $this->errorHead. "/". $errorCode)->with("alert-class", "error");

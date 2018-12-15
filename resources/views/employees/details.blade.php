@@ -89,7 +89,7 @@
                                                 <i class="fa fa-inr margin-r-5"></i> Wage Amount
                                             </strong>
                                             <p class="text-muted multi-line">
-                                                {{ $employee->wage_rate }}
+                                                {{ $employee->wage }}
                                             </p>
                                             <hr>
                                         </div>

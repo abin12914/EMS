@@ -8,7 +8,7 @@ use App\Exceptions\AppCustomException;
 
 class AccountRepository
 {
-    public $repositoryCode, $errorCode = 0;
+    public $repositoryCode, $errorCode = 0, $loop = 0;
 
     public function __construct()
     {
@@ -23,6 +23,7 @@ class AccountRepository
         $orWhereParams=[],
         $relationalParams=[],
         $orderBy=['by' => 'id', 'order' => 'asc', 'num' => null],
+        $aggregates=['key' => null, 'value' => null],
         $withParams=[],
         $activeFlag=true
     ){
@@ -39,32 +40,37 @@ class AccountRepository
                 $accounts = $accounts->active(); //status == 1
             }
 
-            foreach ($whereParams as $param) {
-                $accounts = $accounts->when($param['paramValue'], function ($query) use($param) {
-                    return $query->where($param['paramName'], $param['paramOperator'], $param['paramValue']);
-                });
+            foreach ((array)$whereParams as $param) {
+                if(!empty($param['paramValue'])) {
+                    $accounts = $accounts->where($param['paramName'], $param['paramOperator'], $param['paramValue']);
+                }
             }
 
-            $keyCount = 0;
-            $accounts = $accounts->where(function ($query) {
-                foreach ($orWhereParams as $orParam) {
-                    $accounts = $accounts->when($orParam['paramValue'], function ($query) use($orParam) {
-                        if($keyCount == 0) {
-                            return $query->where($orParam['paramName'], $orParam['paramOperator'], $orParam['paramValue']);
+            $this->loop = 0;
+            $accounts = $accounts->where(function ($query) use($accounts, $orWhereParams){
+                foreach((array)$orWhereParams as $orParam) {
+                    if(!empty($orParam['paramValue'])) {
+                        if($this->loop == 0) {
+                            $this->loop ++;
+                            $query->where($orParam['paramName'], $orParam['paramOperator'], $orParam['paramValue']);
                         } else {
-                            return $query->orWhere($orParam['paramName'], $orParam['paramOperator'], $orParam['paramValue']);
+                            $query->orWhere($orParam['paramName'], $orParam['paramOperator'], $orParam['paramValue']);
                         }
-                        $keyCount ++;
-                    });
+                    }
                 }
             });
 
-            foreach ($relationalParams as $relationalParam) {
-                $accounts = $accounts->when($relationalParam['paramValue'], function ($query) use($relationalParam) {
-                    $query->whereHas($relationalParam['relation'], function($qry) use($relationalParam) {
-                        return $qry->where($relationalParam['paramName'], $relationalParam['paramOperator'], $relationalParam['paramValue']);
+            foreach ((array)$relationalParams as $relationalParam) {
+                if(!empty($relationalParam['paramValue'])) {
+                    $accounts = $accounts->whereHas($relationalParam['relation'], function($qry) use($relationalParam) {
+                        $qry->where($relationalParam['paramName'], $relationalParam['paramOperator'], $relationalParam['paramValue']);
                     });
-                });
+                };
+            }
+
+            //if asking aggregates ? return result.
+            if(!empty($aggregates['key'])) {
+                return $accounts->$aggregates['key']($aggregates['value']);
             }
 
             if(!empty($orderBy['num'])) {
@@ -106,7 +112,7 @@ class AccountRepository
             $account = $account->findOrFail($id);
         } catch (Exception $e) {
             $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 2);
-            
+
             throw new AppCustomException("CustomError", $this->errorCode);
         }
 
@@ -119,8 +125,8 @@ class AccountRepository
     public function saveAccount($inputArray=[], $id=null)
     {
         try {
-            //find first record or create new if none exist
-            $account = Account::firstOrNew(['id' => $id]);
+            //find record with id or create new if none exist
+            $account = Account::findOrNew($id);
 
             foreach ($inputArray as $key => $value) {
                 $account->$key = $value;

@@ -9,7 +9,7 @@ use App\Exceptions\AppCustomException;
 
 class TransactionRepository
 {
-    public $repositoryCode, $errorCode = 0, $transactionRelations=[];
+    public $repositoryCode, $errorCode = 0, $transactionRelations=[], $loop = 0;
 
     public function __construct()
     {
@@ -41,32 +41,32 @@ class TransactionRepository
                 $transactions = $transactions->active(); //status == 1
             }
 
-            foreach ($whereParams as $param) {
-                $transactions = $transactions->when($param['paramValue'], function ($query) use($param) {
-                    return $query->where($param['paramName'], $param['paramOperator'], $param['paramValue']);
-                });
+            foreach ((array)$whereParams as $param) {
+                if(!empty($param['paramValue'])) {
+                    $transactions = $transactions->where($param['paramName'], $param['paramOperator'], $param['paramValue']);
+                }
             }
 
-            $keyCount = 0;
-            $transactions = $transactions->where(function ($query) {
-                foreach ($orWhereParams as $orParam) {
-                    $transactions = $transactions->when($orParam['paramValue'], function ($query) use($orParam) {
-                        if($keyCount == 0) {
-                            return $query->where($orParam['paramName'], $orParam['paramOperator'], $orParam['paramValue']);
+            $this->loop = 0;
+            $transactions = $transactions->where(function ($query) use($transactions, $orWhereParams) {
+                foreach ((array)$orWhereParams as $orParam) {
+                    if(!empty($orParam['paramValue'])) {
+                        if($this->loop == 0) {
+                            $this->loop ++;
+                            $query->where($orParam['paramName'], $orParam['paramOperator'], $orParam['paramValue']);
                         } else {
-                            return $query->orWhere($orParam['paramName'], $orParam['paramOperator'], $orParam['paramValue']);
+                            $query->orWhere($orParam['paramName'], $orParam['paramOperator'], $orParam['paramValue']);
                         }
-                        $keyCount ++;
-                    });
+                    }
                 }
             });
 
-            foreach ($relationalParams as $relationalParam) {
-                $transactions = $transactions->when($relationalParam['paramValue'], function ($query) use($relationalParam) {
-                    $query->whereHas($relationalParam['relation'], function($qry) use($relationalParam) {
-                        return $qry->where($relationalParam['paramName'], $relationalParam['paramOperator'], $relationalParam['paramValue']);
+            foreach ((array)$relationalParams as $relationalParam) {
+                if(!empty($relationalParam['paramValue'])) {
+                    $transactions = $transactions->whereHas($relationalParam['relation'], function($qry) use($relationalParam) {
+                        $qry->where($relationalParam['paramName'], $relationalParam['paramOperator'], $relationalParam['paramValue']);
                     });
-                });
+                }
             }
 
             //has relation checking
@@ -84,8 +84,8 @@ class TransactionRepository
                 $transactions= $transactions->orderBy($orderBy['by'], $orderBy['order'])->get();
             }
         } catch (Exception $e) {
-            $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() $this->repositoryCode + 1):
-            
+            $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 1);
+
             throw new AppCustomException("CustomError", $this->errorCode);
         }
 
@@ -95,12 +95,22 @@ class TransactionRepository
     /**
      * return account.
      */
-    public function getTransaction($id)
+    public function getTransaction($id, $withParams=[], $activeFlag=true)
     {
         $transaction = [];
 
         try {
-            $transaction = Transaction::active()->findOrFail($id);
+            if(empty($withParams)) {
+                $transaction = Transaction::query();
+            } else {
+                $transaction = Transaction::with($withParams);
+            }
+            
+            if($activeFlag) {
+                $transaction = $transaction->active();
+            }
+
+            $transaction = $transaction->findOrFail($id);
         } catch (Exception $e) {
             $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 4);
             
@@ -113,13 +123,11 @@ class TransactionRepository
     /**
      * Action for saving transaction.
      */
-    public function saveTransaction($inputArray, $transaction=null)
+    public function saveTransaction($inputArray, $id=null)
     {
-        $saveFlag = false;
-
         try {
             //find first record or create new if none exist
-            $transaction = Transaction::firstOrNew(['id' => $id]);
+            $transaction = Transaction::findOrNew($id);
 
             foreach ($inputArray as $key => $value) {
                 $transaction->$key = $value;

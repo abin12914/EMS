@@ -8,6 +8,7 @@ use App\Repositories\TransactionRepository;
 use App\Http\Requests\AccountRegistrationRequest;
 use App\Http\Requests\AccountFilterRequest;
 use \Carbon\Carbon;
+use Auth;
 use DB;
 use Exception;
 use App\Exceptions\AppCustomException;
@@ -45,11 +46,16 @@ class AccountController extends Controller
                 'paramOperator' => '=',
                 'paramValue'    => $request->get('account_id'),
             ],
+            'type' => [
+                'paramName'     => 'type',
+                'paramOperator' => '=',
+                'paramValue'    => 3,
+            ],
         ];
         
-        //getAccounts($whereParams=[],$orWhereParams=[],$relationalParams=[],$orderBy=['by' => 'id', 'order' => 'asc', 'num' => null], $withParams=[],$activeFlag=true)
+        //getAccounts($whereParams=[],$orWhereParams=[],$relationalParams=[],$orderBy=['by' => 'id', 'order' => 'asc', 'num' => null], $aggregates=['key' => null, 'value' => null], $withParams=[],$activeFlag=true)
         return view('accounts.list', [
-            'accounts'      => $this->accountRepo->getAccounts($whereParams, [], [], ['by' => 'id', 'order' => 'asc', 'num' => $noOfRecords], [], true),
+            'accounts'      => $this->accountRepo->getAccounts($whereParams, [], [], ['by' => 'id', 'order' => 'asc', 'num' => $noOfRecords], $aggregates=['key' => null, 'value' => null], [], true),
             'relationTypes' => config('constants.accountRelationTypes'),
             'params'        => $whereParams,
             'noOfRecords'   => $noOfRecords,
@@ -97,6 +103,7 @@ class AccountController extends Controller
         //wrappin db transactions
         DB::beginTransaction();
         try {
+            $user = Auth::user();
             //confirming opening balance existency.
             //getAccount($id, $withParams=[], $activeFlag=true)
             $openingBalanceAccount = $this->accountRepo->getAccount($openingBalanceAccountId, [], false);
@@ -117,13 +124,14 @@ class AccountController extends Controller
                 }
 
                 //getTransactions($whereParams=[],$orWhereParams=[],$relationalParams=[],$orderBy=['by' => 'id', 'order' => 'asc', 'num' => null],$withParams=[],$relation,$activeFlag=true)
-                $openingTransactionId = $transactionRepo->getTransactions($searchTransaction, [], [], ['by' => 'id', 'order' => 'asc', 'num' => 1], [], null, false )->id;
+                $openingTransactionId = $transactionRepo->getTransactions($searchTransaction, [], [], ['by' => 'id', 'order' => 'asc', 'num' => 1], [], null, false)->id;
             }
 
             //save to account table
             $accountResponse   = $this->accountRepo->saveAccount([
                 'account_name'      => $request->get('account_name'),
                 'description'       => $request->get('description'),
+                'type'              => array_search('Personal', (config('constants.accountTypes'))),
                 'relation'          => $request->get('relation_type'),
                 'financial_status'  => $financialStatus,
                 'opening_balance'   => $openingBalance,
@@ -131,6 +139,8 @@ class AccountController extends Controller
                 'phone'             => $request->get('phone'),
                 'address'           => $request->get('address'),
                 'status'            => 1,
+                'created_by'        => $user->id,
+                'company_id'        => $user->company_id,
             ], $id);
 
             if(!$accountResponse['flag']) {
@@ -140,15 +150,15 @@ class AccountController extends Controller
             //opening balance transaction details
             if($financialStatus == 1) { //incoming [account holder gives cash to company] [Creditor]
                 $debitAccountId     = $openingBalanceAccountId; //cash flow into the opening balance account
-                $creditAccountId    = $accountResponse['id']; //newly created account id [flow out from new account]
+                $creditAccountId    = $accountResponse['account']->id; //newly created account id [flow out from new account]
                 $particulars        = "Opening balance of ". $name . " - Debit [Creditor]";
             } else if($financialStatus == 2){ //outgoing [company gives cash to account holder] [Debitor]
-                $debitAccountId     = $accountResponse['id']; //newly created account id [flow into new account]
+                $debitAccountId     = $accountResponse['account']->id; //newly created account id [flow into new account]
                 $creditAccountId    = $openingBalanceAccountId; //flow out from the opening balance account
                 $particulars        = "Opening balance of ". $name . " - Credit [Debitor]";
             } else {
                 $debitAccountId     = $openingBalanceAccountId;
-                $creditAccountId    = $accountResponse['id']; //newly created account id
+                $creditAccountId    = $accountResponse['account']->id; //newly created account id
                 $particulars        = "Opening balance of ". $name . " - None";
                 $openingBalance     = 0;
             }
@@ -160,6 +170,8 @@ class AccountController extends Controller
                 'amount'            => $openingBalance,
                 'transaction_date'  => Carbon::now()->format('Y-m-d'),
                 'particulars'       => $particulars,
+                'status'            => 1,
+                'company_id'        => $user->company_id,
             ], $openingTransactionId);
 
             if(!$transactionResponse['flag']) {
@@ -170,8 +182,8 @@ class AccountController extends Controller
             
             if(!empty($id)) {
                 return [
-                    'flag'  => true,
-                    'id'    => $accountResponse['account']->id
+                    'flag'    => true,
+                    'account' => $accountResponse['account'],
                 ];
             }
             return redirect(route('account.show', $accountResponse['account']->id))->with("message","Account details saved successfully. Reference Number : ". $accountResponse['account']->id)->with("alert-class", "success");

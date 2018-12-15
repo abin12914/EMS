@@ -9,7 +9,7 @@ use Exception;
 
 class AccountComponentComposer
 {
-    protected $accounts = [], $cashAccount, $errorHead = null;
+    protected $accounts = [];//, $cashAccount, $errorHead = null;
 
     /**
      * Create a new account partial composer.
@@ -19,24 +19,27 @@ class AccountComponentComposer
      */
     public function __construct(AccountRepository $accountRepo)
     {
-        $errorCode          = 0;
-        $this->errorHead    = config('settings.composer_code.AccountComponentComposer');
-        $cashAccountId      = config('constants.accountConstants.Cash.id');
+        //$errorCode = 0;
+        //$this->errorHead = config('settings.composer_code.AccountComponentComposer');
+        $orWhereParams = [
+            [
+                'paramName'     => 'type',
+                'paramOperator' => '=',
+                'paramValue'    => 1,
+            ],
+            [
+                'paramName'     => 'type',
+                'paramOperator' => '=',
+                'paramValue'    => 3,
+            ]
+        ];
         
         try {
-            $this->accounts     = $accountRepo->getAccounts([], null, true, false);
-            $this->cashAccount  = $accountRepo->getAccount($cashAccountId);//retrieving cash account
-
-            if(empty($this->accounts) && count($this->accounts) <= 0) {
-                $this->cashAccount = collect([$this->cashAccount]); //making a collection
-            }
-            $this->accounts->push($this->cashAccount); //pushing cash account to account list
+            //getAccounts($whereParams=[],$orWhereParams=[],$relationalParams=[],$orderBy=['by' => 'id', 'order' => 'asc', 'num' => null], $withParams=[],$activeFlag=true)
+            $this->accounts = $accountRepo->getAccounts([], $orWhereParams, [], ['by' => 'id', 'order' => 'asc', 'num' => null], $aggregates=['key' => null, 'value' => null], [], true);
+            
         } catch (Exception $e) {
-            if($e->getMessage() == "CustomError") {
-                $errorCode = $e->getCode();
-            } else {
-                $errorCode = 1;
-            }
+            //$errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : 1);
             
             //throw new AppCustomException("CustomError", ($this->errorHead + $errorCode));
         }

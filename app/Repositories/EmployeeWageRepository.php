@@ -8,7 +8,7 @@ use App\Exceptions\AppCustomException;
 
 class EmployeeWageRepository
 {
-    public $repositoryCode, $errorCode = 0;
+    public $repositoryCode, $errorCode = 0, $loop = 0;
 
     public function __construct()
     {
@@ -18,29 +18,66 @@ class EmployeeWageRepository
     /**
      * Return employeeWages.
      */
-    public function getEmployeeWages($params=[], $noOfRecords=null)
-    {
+    public function getEmployeeWages(
+        $whereParams=[],
+        $orWhereParams=[],
+        $relationalParams=[],
+        $orderBy=['by' => 'id', 'order' => 'asc', 'num' => null],
+        $withParams=[],
+        $activeFlag=true
+    ){
         $employeeWages = [];
 
         try {
-            $employeeWages = EmployeeWage::active();
-            
-            foreach ($params as $key => $value) {
-                if(!empty($value)) {
-                    $employeeWages = $employeeWages->where($key, $value);
+            if(empty($withParams)) {
+                $employeeWages = EmployeeWage::query();
+            } else {
+                $employeeWages = EmployeeWage::with($withParams);
+            }
+
+            if($activeFlag) {
+                $employeeWages = $employeeWages->active(); //status == 1
+            }
+
+            foreach ((array)$whereParams as $param) {
+                if(!empty($param['paramValue'])) {
+                    $employeeWages = $employeeWages->where($param['paramName'], $param['paramOperator'], $param['paramValue']);
                 }
             }
-            if(!empty($noOfRecords) && $noOfRecords > 0) {
-                $employeeWages = $employeeWages->paginate($noOfRecords);
+
+            $this->loop = 0;
+            $employeeWages = $employeeWages->where(function ($query) use($employeeWages, $orWhereParams){
+                foreach((array)$orWhereParams as $orParam) {
+                    if(!empty($orParam['paramValue'])) {
+                        if($this->loop == 0) {
+                            $this->loop ++;
+                            $query->where($orParam['paramName'], $orParam['paramOperator'], $orParam['paramValue']);
+                        } else {
+                            $query->orWhere($orParam['paramName'], $orParam['paramOperator'], $orParam['paramValue']);
+                        }
+                    }
+                }
+            });
+
+            foreach ((array)$relationalParams as $relationalParam) {
+                if(!empty($relationalParam['paramValue'])) {
+                    $employeeWages = $employeeWages->whereHas($relationalParam['relation'], function($qry) use($relationalParam) {
+                        $qry->where($relationalParam['paramName'], $relationalParam['paramOperator'], $relationalParam['paramValue']);
+                    });
+                };
+            }
+
+            if(!empty($orderBy['num'])) {
+                if($orderBy['num'] == 1) {
+                    $employeeWages = $employeeWages->firstOrFail();
+                } else {
+                    $employeeWages = $employeeWages->orderBy($orderBy['by'], $orderBy['order'])->paginate($orderBy['num']);
+                }
             } else {
-                $employeeWages= $employeeWages->get();
+                $employeeWages= $employeeWages->orderBy($orderBy['by'], $orderBy['order'])->get();
             }
         } catch (Exception $e) {
-            if($e->getMessage() == "CustomError") {
-                $this->errorCode = $e->getCode();
-            } else {
-                $this->errorCode = $this->repositoryCode + 1;
-            }
+            $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 1);
             
             throw new AppCustomException("CustomError", $this->errorCode);
         }
@@ -49,64 +86,29 @@ class EmployeeWageRepository
     }
 
     /**
-     * Action for saving employeeWages.
-     */
-    public function saveEmployeeWage($inputArray, $employeeWage=null)
-    {
-        $saveFlag   = false;
-
-        try {
-            //employeeWage saving
-            if(empty($employeeWage)) {
-                $employeeWage = new EmployeeWage;
-            }
-            $employeeWage->production_id    = $inputArray['production_id'];
-            $employeeWage->transaction_id   = $inputArray['transaction_id'];
-            $employeeWage->from_date        = $inputArray['from_date'];
-            $employeeWage->to_date          = $inputArray['to_date'];
-            $employeeWage->wage_type        = $inputArray['wage_type'];
-            $employeeWage->wage_amount      = $inputArray['wage_amount'];
-            $employeeWage->status           = 1;
-            //employeeWage save
-            $employeeWage->save();
-
-            $saveFlag = true;
-        } catch (Exception $e) {
-            if($e->getMessage() == "CustomError") {
-                $this->errorCode = $e->getCode();
-            } else {
-                $this->errorCode = $this->repositoryCode + 2;
-            }
-
-            throw new AppCustomException("CustomError", $this->errorCode);
-        }
-
-        if($saveFlag) {
-            return [
-                'flag'  => true,
-                'id'    => $employeeWage->id,
-            ];
-        }
-        return [
-            'flag'      => false,
-            'errorCode' => $this->repositoryCode + 3,
-        ];
-    }
-
-    /**
      * return employeeWage.
      */
-    public function getEmployeeWage($id)
+    public function getEmployeeWage($id, $withParams=[], $activeFlag=true)
     {
         $employeeWage = [];
 
         try {
-            $employeeWage = EmployeeWage::active()->findOrFail($id);
+            if(empty($withParams)) {
+                $employeeWage = EmployeeWage::query();
+            } else {
+                $employeeWage = EmployeeWage::with($withParams);
+            }
+            
+            if($activeFlag) {
+                $employeeWage = $employeeWage->active();
+            }
+
+            $employeeWage = $employeeWage->findOrFail($id);
         } catch (Exception $e) {
             if($e->getMessage() == "CustomError") {
                 $this->errorCode = $e->getCode();
             } else {
-                $this->errorCode = $this->repositoryCode + 4;
+                $this->errorCode = $this->repositoryCode + 3;
             }
             
             throw new AppCustomException("CustomError", $this->errorCode);
@@ -115,40 +117,56 @@ class EmployeeWageRepository
         return $employeeWage;
     }
 
-    public function deleteEmployeeWage($id, $forceFlag=false)
+    /**
+     * Action for saving employeeWages.
+     */
+    public function saveEmployeeWage($inputArray, $id=null)
     {
-        $deleteFlag = false;
+        $saveFlag   = false;
 
         try {
-            //get employeeWage
-            $employeeWage = $this->getEmployeeWage($id);
+            //find record with id or create new if none exist
+            $employeeWage = EmployeeWage::findOrNew($id);
 
-            //force delete or soft delete
-            //related models will be deleted by deleting event handlers
-            if($forceFlag) {
-                $employeeWage->forceDelete();
-            } else {
-                $employeeWage->delete();
+            foreach ($inputArray as $key => $value) {
+                $employeeWage->$key = $value;
             }
-            
-            $deleteFlag = true;
+            //employeeWage save
+            $employeeWage->save();
+
+            return [
+                'flag'    => true,
+                'employeeWage' => $employeeWage,
+            ];
         } catch (Exception $e) {
-            if($e->getMessage() == "CustomError") {
-                $this->errorCode = $e->getCode();
-            } else {
-                $this->errorCode = $this->repositoryCode + 5;
-            }
-            
+            $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 3);
+
             throw new AppCustomException("CustomError", $this->errorCode);
         }
+        return [
+            'flag'      => false,
+            'errorCode' => $this->repositoryCode + 4,
+        ];
+    }
 
-        if($deleteFlag) {
+    public function deleteEmployeeWage($id, $forceFlag=false)
+    {
+        try {
+            $employeeWage = $this->getEmployeeWage($id, [], false);
+
+            //force delete or soft delete
+            //related records will be deleted by deleting event handlers
+            $forceFlag ? $employeeWage->forceDelete() : $employeeWage->delete();
+            
             return [
                 'flag'  => true,
                 'force' => $forceFlag,
             ];
+        } catch (Exception $e) {
+            $this->errorCode = (($e->getMessage() == "CustomError") ?  $e->getCode() : $this->repositoryCode + 5);
+            
+            throw new AppCustomException("CustomError", $this->errorCode);
         }
-
         return [
             'flag'          => false,
             'errorCode'    => $this->repositoryCode + 6,
