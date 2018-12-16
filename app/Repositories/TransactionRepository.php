@@ -24,6 +24,7 @@ class TransactionRepository
         $orWhereParams=[],
         $relationalParams=[],
         $orderBy=['by' => 'id', 'order' => 'asc', 'num' => null],
+        $aggregates=['key' => null, 'value' => null],
         $withParams=[],
         $relation,
         $activeFlag=true
@@ -31,58 +32,20 @@ class TransactionRepository
         $transactions = [];
 
         try {
-            if(empty($withParams)) {
-                $transactions = Transaction::active();
-            } else {
-                $transactions = Transaction::with($withParams);
-            }
+            $transactions = empty($withParams) ? Transaction::query() : Transaction::with($withParams);
 
-            if($activeFlag) {
-                $transactions = $transactions->active(); //status == 1
-            }
+            $transactions = $activeFlag ? $transactions->active() : $transactions;
 
-            foreach ((array)$whereParams as $param) {
-                if(!empty($param['paramValue'])) {
-                    $transactions = $transactions->where($param['paramName'], $param['paramOperator'], $param['paramValue']);
-                }
-            }
+            $transactions = parent::whereFilter($transactions, $whereParams);
 
-            $this->loop = 0;
-            $transactions = $transactions->where(function ($query) use($transactions, $orWhereParams) {
-                foreach ((array)$orWhereParams as $orParam) {
-                    if(!empty($orParam['paramValue'])) {
-                        if($this->loop == 0) {
-                            $this->loop ++;
-                            $query->where($orParam['paramName'], $orParam['paramOperator'], $orParam['paramValue']);
-                        } else {
-                            $query->orWhere($orParam['paramName'], $orParam['paramOperator'], $orParam['paramValue']);
-                        }
-                    }
-                }
-            });
+            $transactions = parent::orWhereFilter($transactions, $orWhereParams);
 
-            foreach ((array)$relationalParams as $relationalParam) {
-                if(!empty($relationalParam['paramValue'])) {
-                    $transactions = $transactions->whereHas($relationalParam['relation'], function($qry) use($relationalParam) {
-                        $qry->where($relationalParam['paramName'], $relationalParam['paramOperator'], $relationalParam['paramValue']);
-                    });
-                }
-            }
+            $transactions = parent::relationalFilter($transactions, $relationalParams);
 
             //has relation checking
-            if(!empty($relation)) {
-                $transactions = $transactions->has($this->transactionRelations[$relation]['relationName']);
-            }
+            $transactions = (!empty($relation) ? $transactions->has($this->transactionRelations[$relation]['relationName']) : $transactions);
 
-            if(!empty($orderBy['num'])) {
-                if($orderBy['num'] == 1) {
-                    $transactions = $transactions->firstOrFail();
-                } else {
-                    $transactions = $transactions->orderBy($orderBy['by'], $orderBy['order'])->paginate($orderBy['num']);
-                }
-            } else {
-                $transactions= $transactions->orderBy($orderBy['by'], $orderBy['order'])->get();
-            }
+            return (!empty($aggregates['key']) ? parent::aggregatesSwitch($transactions, $aggregates) : parent::getFilter($transactions, $orderBy));
         } catch (Exception $e) {
             $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 1);
 

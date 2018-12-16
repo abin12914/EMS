@@ -6,7 +6,7 @@ use App\Models\Expense;
 use Exception;
 use App\Exceptions\AppCustomException;
 
-class ExpenseRepository
+class ExpenseRepository extends Repository
 {
     public $repositoryCode, $errorCode = 0;
 
@@ -18,38 +18,32 @@ class ExpenseRepository
     /**
      * Return expenses.
      */
-    public function getExpenses($params=[], $relationalParams=[], $noOfRecords=null)
-    {
+    public function getExpenses(
+        $whereParams=[],
+        $orWhereParams=[],
+        $relationalParams=[],
+        $orderBy=['by' => 'id', 'order' => 'asc', 'num' => null],
+        $aggregates=['key' => null, 'value' => null],
+        $withParams=[],
+        $activeFlag=true
+    ){
         $expenses = [];
 
         try {
-            $expenses = Expense::with(['branch', 'transaction.debitAccount'])->active();
+            $expenses = empty($withParams) ? Expense::query() : Expense::with($withParams);
 
-            foreach ($params as $param) {
-                if(!empty($param) && !empty($param['paramValue'])) {
-                    $expenses = $expenses->where($param['paramName'], $param['paramOperator'], $param['paramValue']);
-                }
-            }
+            $expenses = $activeFlag ? $expenses->active() : $expenses;
 
-            foreach ($relationalParams as $param) {
-                if(!empty($param) && !empty($param['paramValue'])) {
-                    $expenses = $expenses->whereHas($param['relation'], function($qry) use($param) {
-                        $qry->where($param['paramName'], $param['paramValue']);
-                    });
-                }
-            }
+            $expenses = parent::whereFilter($expenses, $whereParams);
 
-            if(!empty($noOfRecords) && $noOfRecords > 0) {
-                $expenses = $expenses->paginate($noOfRecords);
-            } else {
-                $expenses= $expenses->get();
-            }
+            $expenses = parent::orWhereFilter($expenses, $orWhereParams);
+
+            $expenses = parent::relationalFilter($expenses, $relationalParams);
+
+            return (!empty($aggregates['key']) ? parent::aggregatesSwitch($expenses, $aggregates) : parent::getFilter($expenses, $orderBy));
         } catch (Exception $e) {
-            if($e->getMessage() == "CustomError") {
-                $this->errorCode = $e->getCode();
-            } else {
-                $this->errorCode = $this->repositoryCode + 1;
-            }
+            $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 1);
+
             throw new AppCustomException("CustomError", $this->errorCode);
         }
 
@@ -57,40 +51,56 @@ class ExpenseRepository
     }
 
     /**
-     * Action for expense save.
+     * return expense.
      */
-    public function saveExpense($inputArray=[], $expense=null)
+    public function getExpense($id, $withParams=[], $activeFlag=true)
     {
-        $saveFlag   = false;
+        $expense = [];
 
         try {
-            //expense saving
-            if(empty($expense)) {
-                $expense = new Expense;
-            }
-            $expense->transaction_id = $inputArray['transaction_id'];
-            $expense->date           = $inputArray['date'];
-            $expense->service_id     = $inputArray['service_id'];
-            $expense->bill_amount    = $inputArray['bill_amount'];
-            $expense->status         = 1;
-            //expense save
-            $expense->save();
-
-            $saveFlag = true;
-        } catch (Exception $e) {
-            if($e->getMessage() == "CustomError") {
-                $this->errorCode = $e->getCode();
+            if(empty($withParams)) {
+                $expense = Expense::query();
             } else {
-                $this->errorCode = $this->repositoryCode + 2;
+                $expense = Expense::with($withParams);
             }
+            
+            if($activeFlag) {
+                $expense = $expense->active();
+            }
+
+            $expense = $expense->findOrFail($id);
+        } catch (Exception $e) {
+            $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 2);
+
             throw new AppCustomException("CustomError", $this->errorCode);
         }
 
-        if($saveFlag) {
+        return $expense;
+    }
+
+    /**
+     * Action for expense save.
+     */
+    public function saveExpense($inputArray=[], $id=null)
+    {
+        try {
+            //find record with id or create new if none exist
+            $expense = Expense::findOrNew($id);
+
+            foreach ($inputArray as $key => $value) {
+                $expense->$key = $value;
+            }
+            //expense save
+            $expense->save();
+
             return [
-                'flag'  => true,
-                'id'    => $expense->id,
+                'flag'    => true,
+                'expense' => $expense,
             ];
+        } catch (Exception $e) {
+            $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 3);
+
+            throw new AppCustomException("CustomError", $this->errorCode);
         }
         return [
             'flag'      => false,
@@ -98,62 +108,25 @@ class ExpenseRepository
         ];
     }
 
-    /**
-     * return expense.
-     */
-    public function getExpense($id)
-    {
-        $expense = [];
-
-        try {
-            $expense = Expense::active()->findOrFail($id);
-        } catch (Exception $e) {
-            if($e->getMessage() == "CustomError") {
-                $this->errorCode = $e->getCode();
-            } else {
-                $this->errorCode = $this->repositoryCode + 4;
-            }
-            
-            throw new AppCustomException("CustomError", $this->errorCode);
-        }
-
-        return $expense;
-    }
-
     public function deleteExpense($id, $forceFlag=false)
     {
-        $deleteFlag = false;
-
         try {
             //get expense
-            $expense = $this->getExpense($id);
+            $expense = $this->getExpense($id, [], false);
 
             //force delete or soft delete
             //related models will be deleted by deleting event handlers
-            if($forceFlag) {
-                $expense->forceDelete();
-            } else {
-                $expense->delete();
-            }
+            $forceFlag ? $expense->forceDelete() : $expense->delete();
             
-            $deleteFlag = true;
-        } catch (Exception $e) {
-            if($e->getMessage() == "CustomError") {
-                $this->errorCode = $e->getCode();
-            } else {
-                $this->errorCode = $this->repositoryCode + 5;
-            }
-            
-            throw new AppCustomException("CustomError", $this->errorCode);
-        }
-
-        if($deleteFlag) {
             return [
                 'flag'  => true,
                 'force' => $forceFlag,
             ];
+        } catch (Exception $e) {
+            $this->errorCode = (($e->getMessage() == "CustomError") ?  $e->getCode() : $this->repositoryCode + 5);
+            
+            throw new AppCustomException("CustomError", $this->errorCode);
         }
-
         return [
             'flag'          => false,
             'errorCode'    => $this->repositoryCode + 6,

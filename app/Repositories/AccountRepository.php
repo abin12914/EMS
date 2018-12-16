@@ -6,9 +6,9 @@ use App\Models\Account;
 use Exception;
 use App\Exceptions\AppCustomException;
 
-class AccountRepository
+class AccountRepository extends Repository
 {
-    public $repositoryCode, $errorCode = 0, $loop = 0;
+    public $repositoryCode, $errorCode = 0;
 
     public function __construct()
     {
@@ -30,58 +30,18 @@ class AccountRepository
         $accounts = [];
 
         try {
-            if(empty($withParams)) {
-                $accounts = Account::query();
-            } else {
-                $accounts = Account::with($withParams);
-            }
+            $accounts = empty($withParams) ? Account::query() : Account::with($withParams);
 
-            if($activeFlag) {
-                $accounts = $accounts->active(); //status == 1
-            }
+            $accounts = $activeFlag ? $accounts->active() : $accounts;
 
-            foreach ((array)$whereParams as $param) {
-                if(!empty($param['paramValue'])) {
-                    $accounts = $accounts->where($param['paramName'], $param['paramOperator'], $param['paramValue']);
-                }
-            }
+            $accounts = parent::whereFilter($accounts, $whereParams);
 
-            $this->loop = 0;
-            $accounts = $accounts->where(function ($query) use($accounts, $orWhereParams){
-                foreach((array)$orWhereParams as $orParam) {
-                    if(!empty($orParam['paramValue'])) {
-                        if($this->loop == 0) {
-                            $this->loop ++;
-                            $query->where($orParam['paramName'], $orParam['paramOperator'], $orParam['paramValue']);
-                        } else {
-                            $query->orWhere($orParam['paramName'], $orParam['paramOperator'], $orParam['paramValue']);
-                        }
-                    }
-                }
-            });
+            $accounts = parent::orWhereFilter($accounts, $orWhereParams);
 
-            foreach ((array)$relationalParams as $relationalParam) {
-                if(!empty($relationalParam['paramValue'])) {
-                    $accounts = $accounts->whereHas($relationalParam['relation'], function($qry) use($relationalParam) {
-                        $qry->where($relationalParam['paramName'], $relationalParam['paramOperator'], $relationalParam['paramValue']);
-                    });
-                };
-            }
+            $accounts = parent::relationalFilter($accounts, $relationalParams);
 
             //if asking aggregates ? return result.
-            if(!empty($aggregates['key'])) {
-                return $accounts->$aggregates['key']($aggregates['value']);
-            }
-
-            if(!empty($orderBy['num'])) {
-                if($orderBy['num'] == 1) {
-                    $accounts = $accounts->firstOrFail();
-                } else {
-                    $accounts = $accounts->orderBy($orderBy['by'], $orderBy['order'])->paginate($orderBy['num']);
-                }
-            } else {
-                $accounts= $accounts->orderBy($orderBy['by'], $orderBy['order'])->get();
-            }
+            return (!empty($aggregates['key']) ? parent::aggregatesSwitch($accounts, $aggregates): parent::getFilter($accounts, $orderBy));
         } catch (Exception $e) {
             $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 1);
             

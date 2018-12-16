@@ -6,7 +6,7 @@ use App\Models\Employee;
 use Exception;
 use App\Exceptions\AppCustomException;
 
-class EmployeeRepository
+class EmployeeRepository extends Repository
 {
     public $repositoryCode, $errorCode = 0, $loop = 0;
 
@@ -30,58 +30,18 @@ class EmployeeRepository
         $employees = [];
 
         try {
-            if(empty($withParams)) {
-                $employees = Employee::query();
-            } else {
-                $employees = Employee::with($withParams);
-            }
+            $employees = empty($withParams) ? Employee::query() : Employee::with($withParams);
 
-            if($activeFlag) {
-                $employees = $employees->active(); //status == 1
-            }
+            $employees = $activeFlag ? $employees->active() : $employees;
 
-            foreach ((array)$whereParams as $param) {
-                if(!empty($param['paramValue'])) {
-                    $employees = $employees->where($param['paramName'], $param['paramOperator'], $param['paramValue']);
-                }
-            }
+            $employees = parent::whereFilter($employees, $whereParams);
 
-            $this->loop = 0;
-            $employees = $employees->where(function ($query) use($employees, $orWhereParams){
-                foreach((array)$orWhereParams as $orParam) {
-                    if(!empty($orParam['paramValue'])) {
-                        if($this->loop == 0) {
-                            $this->loop ++;
-                            $query->where($orParam['paramName'], $orParam['paramOperator'], $orParam['paramValue']);
-                        } else {
-                            $query->orWhere($orParam['paramName'], $orParam['paramOperator'], $orParam['paramValue']);
-                        }
-                    }
-                }
-            });
+            $employees = parent::orWhereFilter($employees, $orWhereParams);
 
-            foreach ((array)$relationalParams as $relationalParam) {
-                if(!empty($relationalParam['paramValue'])) {
-                    $employees = $employees->whereHas($relationalParam['relation'], function($qry) use($relationalParam) {
-                        $qry->where($relationalParam['paramName'], $relationalParam['paramOperator'], $relationalParam['paramValue']);
-                    });
-                };
-            }
+            $employees = parent::relationalFilter($employees, $relationalParams);
 
             //if asking aggregates ? return result.
-            if(!empty($aggregates['key'])) {
-                return $employees->$aggregates['key']($aggregates['value']);
-            }
-            
-            if(!empty($orderBy['num'])) {
-                if($orderBy['num'] == 1) {
-                    $employees = $employees->firstOrFail();
-                } else {
-                    $employees = $employees->orderBy($orderBy['by'], $orderBy['order'])->paginate($orderBy['num']);
-                }
-            } else {
-                $employees= $employees->orderBy($orderBy['by'], $orderBy['order'])->get();
-            }
+            return (!empty($aggregates['key']) ? parent::aggregatesSwitch($employees, $aggregates) : parent::getFilter($employees, $orderBy));
         } catch (Exception $e) {
             $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 1);
             

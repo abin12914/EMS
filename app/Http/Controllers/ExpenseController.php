@@ -41,12 +41,12 @@ class ExpenseController extends Controller
 
         $whereParams = [
             'from_date' => [
-                'paramName'     => 'date',
+                'paramName'     => 'expense_date',
                 'paramOperator' => '>=',
                 'paramValue'    => $fromDate,
             ],
             'to_date' => [
-                'paramName'     => 'date',
+                'paramName'     => 'expense_date',
                 'paramOperator' => '<=',
                 'paramValue'    => $toDate,
             ],
@@ -65,17 +65,16 @@ class ExpenseController extends Controller
                 'paramValue'    => $request->get('supplier_account_id'),
             ]
         ];
-
         //params passing for auto selection
         $whereParams['from_date']['paramValue'] = $request->get('from_date');
         $whereParams['to_date']['paramValue']   = $request->get('to_date');
         
         //getExpenses($whereParams=[],$orWhereParams=[],$relationalParams=[],$orderBy=['by' => 'id', 'order' => 'asc', 'num' => null], $withParams=[],$activeFlag=true)
         return view('expenses.list', [
-            'expenses'      => $this->expenseRepo->getExpenses($whereParams, [], $relationalParams, ['by' => 'id', 'order' => 'asc', 'num' => $noOfRecords], [], [], true),
-            'totalExpense'  => $this->expenseRepo->getExpenses($whereParams, [], $relationalParams, [], ['key' => 'sum', 'value' => 'bill_amount'], true),
-            'params'        => array_merge($params, $relationalParams),
-            'noOfRecords'   => $noOfRecords,
+            'expenses'     => $this->expenseRepo->getExpenses($whereParams, [], $relationalParams, ['by' => 'id', 'order' => 'asc', 'num' => $noOfRecords], [], [], true),
+            'totalExpense' => $this->expenseRepo->getExpenses($whereParams, [], $relationalParams, [], ['key' => 'sum', 'value' => 'bill_amount'], [], true),
+            'params'       => array_merge($whereParams, $relationalParams),
+            'noOfRecords'  => $noOfRecords,
         ]);
     }
 
@@ -114,7 +113,7 @@ class ExpenseController extends Controller
 
             //confirming expense account exist-ency.
             $expenseAccount = $accountRepo->getAccount($expenseAccountId, [], false);
-            $expense = $accountRepo->getAccount($id, [], false);
+            $expense = $expenseRepo->getExpense($id, [], false);
 
             //save expense transaction to table
             $transactionResponse   = $transactionRepo->saveTransaction([
@@ -138,9 +137,9 @@ class ExpenseController extends Controller
                 'excavator_id'   => $request->get('excavator__id'),
                 'service_id'     => $request->get('service_id'),
                 'bill_amount'    => $totalBill,
-                'status'         = 1,
-                'created_by'     = $user->id,
-                'company_id'     = $user->company_id,
+                'status'         => 1,
+                'created_by'     => $user->id,
+                'company_id'     => $user->company_id,
             ], $id);
 
             if(!$expenseResponse['flag']) {
@@ -266,7 +265,7 @@ class ExpenseController extends Controller
             //roll back in case of exceptions
             DB::rollback();
 
-            $errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : 5);
+            $errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : 4);
         }
         
         return redirect()->back()->with("message","Failed to delete the expense details. Error Code : ". $this->errorHead. "/". $errorCode)->with("alert-class", "error");
