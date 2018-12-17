@@ -17,12 +17,11 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 class AccountController extends Controller
 {
     protected $accountRepo;
-    public $errorHead = null, $noOfRecordsPerPage = null;
+    public $errorHead = null;
 
     public function __construct(AccountRepository $accountRepo)
     {
         $this->accountRepo          = $accountRepo;
-        $this->noOfRecordsPerPage   = config('settings.no_of_record_per_page');
         $this->errorHead            = config('settings.controller_code.AccountController');
     }
 
@@ -33,7 +32,7 @@ class AccountController extends Controller
      */
     public function index(AccountFilterRequest $request)
     {
-        $noOfRecords = !empty($request->get('no_of_records')) ? $request->get('no_of_records') : $this->noOfRecordsPerPage;
+        $noOfRecordsPerPage = $request->get('no_of_records') ?? config('settings.no_of_record_per_page');
 
         $whereParams = [
             'relation_type' => [
@@ -55,10 +54,10 @@ class AccountController extends Controller
         
         //getAccounts($whereParams=[],$orWhereParams=[],$relationalParams=[],$orderBy=['by' => 'id', 'order' => 'asc', 'num' => null], $aggregates=['key' => null, 'value' => null], $withParams=[],$activeFlag=true)
         return view('accounts.list', [
-            'accounts'      => $this->accountRepo->getAccounts($whereParams, [], [], ['by' => 'id', 'order' => 'asc', 'num' => $noOfRecords], $aggregates=['key' => null, 'value' => null], [], true),
+            'accounts'      => $this->accountRepo->getAccounts($whereParams, [], [], ['by' => 'id', 'order' => 'asc', 'num' => $noOfRecordsPerPage], ['key' => null, 'value' => null], [], true),
             'relationTypes' => config('constants.accountRelationTypes'),
             'params'        => $whereParams,
-            'noOfRecords'   => $noOfRecords,
+            'noOfRecords'   => $noOfRecordsPerPage,
         ]);
     }
 
@@ -123,8 +122,8 @@ class AccountController extends Controller
                     ];
                 }
 
-                //getTransactions($whereParams=[],$orWhereParams=[],$relationalParams=[],$orderBy=['by' => 'id', 'order' => 'asc', 'num' => null],$withParams=[],$relation,$activeFlag=true)
-                $openingTransactionId = $transactionRepo->getTransactions($searchTransaction, [], [], ['by' => 'id', 'order' => 'asc', 'num' => 1], [], null, false)->id;
+                //getTransactions($whereParams=[],$orWhereParams=[],$relationalParams=[],$orderBy=['by' => 'id', 'order' => 'asc', 'num' => null],$aggregates=['key' => null, 'value' => null],$withParams=[],$relation,$activeFlag=true)
+                $openingTransactionId = $transactionRepo->getTransactions($searchTransaction, [], [], ['by' => 'id', 'order' => 'asc', 'num' => 1], [], [], null, false)->id;
             }
 
             //save to account table
@@ -195,8 +194,8 @@ class AccountController extends Controller
         }
         if(!empty($id)) {
             return [
-                'flag'          => false,
-                'errorCode'    => $errorCode
+                'flag'      => false,
+                'errorCode' => $errorCode
             ];
         }
         

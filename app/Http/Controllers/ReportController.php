@@ -15,13 +15,12 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 class ReportController extends Controller
 {
     protected $transactionRepo, $accountRepo;
-    public $errorHead = null, $noOfRecordsPerPage = null;
+    public $errorHead = null;
 
     public function __construct(TransactionRepository $transactionRepo, AccountRepository $accountRepo)
     {
         $this->transactionRepo      = $transactionRepo;
         $this->accountRepo          = $accountRepo;
-        $this->noOfRecordsPerPage   = config('settings.no_of_record_per_page');
         $this->errorHead            = config('settings.controller_code.ReportController');
     }
 
@@ -32,26 +31,25 @@ class ReportController extends Controller
      */
     public function accountStatement(TransactionFilterRequest $request)
     {
-        $obDebit            = 0;
-        $obCredit           = 0;
+        $obDebit         = 0;
+        $obCredit        = 0;
         
-        $accountId          = $request->get('account_id');
-        $fromDate           = !empty($request->get('from_date')) ? Carbon::createFromFormat('d-m-Y', $request->get('from_date'))->format('Y-m-d') : "";
-        $toDate             = !empty($request->get('to_date')) ? Carbon::createFromFormat('d-m-Y', $request->get('to_date'))->format('Y-m-d') : "";
-        $noOfRecords        = !empty($request->get('no_of_records')) ? $request->get('no_of_records') : $this->noOfRecordsPerPage;
+        $noOfRecordsPerPage = $request->get('no_of_records') ?? config('settings.no_of_record_per_page');
+        //if no account is selected use cash account;
+        $accountId          = $request->get('account_id') ?? config('constants.accountConstants.Cash.id');
+
+        $fromDate           = !empty($request->get('from_date')) ? Carbon::createFromFormat('d-m-Y', $request->get('from_date'))->format('Y-m-d') : null;
+        $toDate             = !empty($request->get('to_date')) ? Carbon::createFromFormat('d-m-Y', $request->get('to_date'))->format('Y-m-d') : null;
+
         $relation           = $request->get('relation');
-        $transactionType    = !empty($request->get('transaction_type')) ? $request->get('transaction_type') : 0;
+        $transactionType    = $request->get('transaction_type');
 
         try {
-            if(empty($accountId)) {
-                //if no account is selected use cash account
-                $accountId = config('constants.accountConstants.Cash.id');
-            }
 
             //confirming account existency.
-            $account = $this->accountRepo->getAccount($accountId, false);
+            $account = $this->accountRepo->getAccount($accountId, [], false);
 
-            $params = [
+            $whereParams = [
                 'from_date' =>  [
                     'paramName'     => 'transaction_date',
                     'paramOperator' => '>=',
@@ -88,59 +86,54 @@ class ReportController extends Controller
                 ]
             ];
 
-            $orParams = array_merge($debitParam, $creditParam);
+            $orWhereParams = array_merge($debitParam, $creditParam);
 
+            $subTotalWhereParams = [];
             if($transactionType == 1) {
                 //if user select debit transactions only then remove credit transaction checking (or condition)
-                unset($orParams['credit_account_id']);
+                unset($orWhereParams['credit_account_id']);
             } elseif ($transactionType == 2) {
                 //if user select credit transactions only then remove debit transaction checking (or condition)
-                unset($orParams['debit_account_id']);
+                unset($orWhereParams['debit_account_id']);
             } //else both transactions are included with or condition
 
             //display data
-            $transactions   = $this->transactionRepo->getTransactions($params, $orParams, [], $relation, $noOfRecords);
+            //getTransactions($whereParams=[],$orWhereParams=[],$relationalParams=[],$orderBy=['by' => 'id', 'order' => 'asc', 'num' => null],$aggregates=['key' => null, 'value' => null],$withParams=[],$relation,$activeFlag=true)
+            $transactions = $this->transactionRepo->getTransactions($whereParams, $orWhereParams, [], ['by' => 'id', 'order' => 'asc', 'num' => $noOfRecordsPerPage], [], [], $relation, true);
 
             //subtotal values
-            $subTotaltransactions = $this->transactionRepo->getTransactions($params, $orParams, [], $relation, null);
-            $subTotalDebit  = $subTotaltransactions->where('debit_account_id', $accountId)->sum('amount');
-            $subTotalCredit = $subTotaltransactions->where('credit_account_id', $accountId)->sum('amount');
+            $subTotalDebit  = $this->transactionRepo->getTransactions((array_merge($whereParams, $debitParam)), [], [], [], ['key' => 'sum', 'value' => 'amount'], [], $relation, true);
+            $subTotalCredit = $this->transactionRepo->getTransactions((array_merge($whereParams, $creditParam)), [], [], [], ['key' => 'sum', 'value' => 'amount'], [], $relation, true);
 
             //outstanding values
-            $outstandingDebit   = $this->transactionRepo->getTransactions([], $debitParam, [], null, null)->sum('amount');
-            $outstandingCredit  = $this->transactionRepo->getTransactions([], $creditParam, [], null, null)->sum('amount');
+            $outstandingDebit   = $this->transactionRepo->getTransactions($debitParam, [], [], [], ['key' => 'sum', 'value' => 'amount'], [], null, true);
+            $outstandingCredit  = $this->transactionRepo->getTransactions($creditParam, [], [], [], ['key' => 'sum', 'value' => 'amount'], [], null, true);
 
             //old balance values
             if(!empty($fromDate)) {
-                $obtransactions = $this->transactionRepo->getTransactions($obParam, $orParams, [], $relation, null);
-                $obDebit        = $obtransactions->where('debit_account_id', $accountId)->sum('amount');
-                $obCredit       = $obtransactions->where('credit_account_id', $accountId)->sum('amount');
+                $obDebit = $this->transactionRepo->getTransactions((array_merge($obParam, $debitParam)), [], [], [], ['key' => 'sum', 'value' => 'amount'], [], null, true);
+                $obCredit = $this->transactionRepo->getTransactions((array_merge($obParam, $creditParam)), [], [], [], ['key' => 'sum', 'value' => 'amount'], [], null, true);
             }
 
         } catch(Exception $e) {
-            if($e->getMessage() == "CustomError") {
-                $errorCode = $e->getCode();
-            } else {
-                $errorCode = 1;
-            }
+            $errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : 1);
 
             throw new AppCustomException("CustomError", $errorCode);
             
         }
 
         //params passing for auto selection
-        $params['from_date']['paramValue']  = $request->get('from_date');
-        $params['to_date']['paramValue']    = $request->get('to_date');
-        $params['relation']['paramValue']   = $relation;
-        $params['account_id']['paramValue'] = $accountId;
-        $params = array_merge($params, $orParams);
+        $params['from_date']['paramValue']        = $request->get('from_date');
+        $params['to_date']['paramValue']          = $request->get('to_date');
+        $params['relation']['paramValue']         = $relation;
+        $params['account_id']['paramValue']       = $accountId;
+        $params['transaction_type']['paramValue'] = $transactionType;
 
         return view('reports.account-statement', [
             'transactions'          => $transactions,
             'params'                => $params,
             'relations'             => config('constants.transactionRelations'),
-            'transactionType'       => $transactionType,
-            'noOfRecords'           => $noOfRecords,
+            'noOfRecords'           => $noOfRecordsPerPage,
             'account'               => $account,
             'outstandingDebit'      => $outstandingDebit,
             'outstandingCredit'     => $outstandingCredit,
@@ -162,21 +155,11 @@ class ReportController extends Controller
         $accountRelation    = $request->get('relation_type');
 
         if(!empty($accountRelation)) {
-            $params = [
-                'relation' => $accountRelation,
-            ];
-
-            $accounts = $accountRepo->getAccounts($params, null, true, false);
-
-            if(empty($accounts)) {
-                session()->flash('fixed-message', 'No accounts available to show!');
-                return view('reports.credit-list');
-            }
-
             $debitRelationalParams = [
                 'relation_type'   =>  [
                     'relation'      => 'debitAccount',
                     'paramName'     => 'relation',
+                    'paramOperator' => '=',
                     'paramValue'    => $accountRelation,
                 ]
             ];
@@ -185,43 +168,14 @@ class ReportController extends Controller
                 'relation_type'   =>  [
                     'relation'      => 'creditAccount',
                     'paramName'     => 'relation',
+                    'paramOperator' => '=',
                     'paramValue'    => $accountRelation,
                 ]
             ];
 
-            $debitTransactions     = $this->transactionRepo->getTransactions($params, [], $debitRelationalParams, null, null);
-            $creditTransactions    = $this->transactionRepo->getTransactions($params, [], $creditRelationalParams, null, null);
-
-            foreach ($debitTransactions as $key => $transaction) {
-                if(empty($debitAmount[$transaction->debit_account_id])) {
-                    $debitAmount[$transaction->debit_account_id] = 0;
-                }
-                    
-                $debitAmount[$transaction->debit_account_id] = $debitAmount[$transaction->debit_account_id] + $transaction->amount;
-            }
-
-            foreach ($creditTransactions as $key => $transaction) {
-                if(empty($creditAmount[$transaction->credit_account_id])) {
-                    $creditAmount[$transaction->credit_account_id] = 0;
-                }
-                
-                $creditAmount[$transaction->credit_account_id] = $creditAmount[$transaction->credit_account_id] + $transaction->amount;
-            }
-
-            foreach ($accounts as $key => $account) {
-                if(empty($debitAmount[$account->id])) {
-                    $debitAmount[$account->id] = 0;
-                }
-                if(empty($creditAmount[$account->id])) {
-                    $creditAmount[$account->id] = 0;
-                }
-
-                if($debitAmount[$account->id] > $creditAmount[$account->id]) {
-                    $totalDebit     = $totalDebit + ($debitAmount[$account->id] - $creditAmount[$account->id]);
-                } else {
-                    $totalCredit    = $totalCredit + ($creditAmount[$account->id] - $debitAmount[$account->id]);
-                }
-            }
+            $debitTransactions = $this->transactionRepo->groupTransactions([], [], $debitRelationalParams, [], [], 'debit_account_id', true)->select(\DB::raw('debit_account_id as id'), \DB::raw('sum(amount) as total'))->get();
+            $creditTransactions = $this->transactionRepo->groupTransactions([], [], $creditRelationalParams, [], [], 'credit_account_id', true)->select(\DB::raw('credit_account_id as id'), \DB::raw('sum(amount) as total'))->get();
+            dd($debitTransactions);
         }
 
         return view('reports.credit-list',[

@@ -20,8 +20,6 @@ class UserRepository
      */
     public function updateProfile($inputArray=[], $user=[])
     {
-        $saveFlag = false;
-
         try {
             $user->username = $inputArray['username'];
             $user->name     = $inputArray['name'];
@@ -32,25 +30,17 @@ class UserRepository
             }
 
             $user->save();
-            $saveFlag = true;
-        } catch(Exception $e) {
-            if($e->getMessage() == "CustomError") {
-                $this->errorCode = $e->getCode();
-            } else {
-                $this->errorCode = $this->repositoryCode + 1;
-            }
-            
-            throw new AppCustomException("CustomError", $this->errorCode);
-        }
-
-        if($saveFlag) {
             return [
                 'flag'  => true,
             ];
+        } catch(Exception $e) {
+            $errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode +1);
+            
+            throw new AppCustomException("CustomError", $this->errorCode);
         }
         return [
             'flag'      => false,
-            'errorCode' => $this->repositoryCode,
+            'errorCode' => $this->errorCode,
         ];
     }
 }

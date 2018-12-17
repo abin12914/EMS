@@ -67,9 +67,9 @@
                                                 Transaction Type : 
                                             </label>
                                             <select class="form-control select2" name="transaction_type" id="transaction_type" style="width: 100%" tabindex="5">
-                                                <option value="0" {{ (empty(old('transaction_type'))  || old('transaction_type') == 0 || $transactionType == 0) ? 'selected' : '' }}>All type</option>
-                                                <option value="1" {{ ((old('transaction_type') == 1 ) || $transactionType == 1) ? 'selected' : '' }}>Debit</option>
-                                                <option value="2" {{ ((old('transaction_type') == 2 ) || $transactionType == 2) ? 'selected' : '' }}>Credit</option>
+                                                <option value="0" {{ (empty(old('transaction_type'))  || old('transaction_type') == 0 || $params['transaction_type']['paramValue'] == 0) ? 'selected' : '' }}>All type</option>
+                                                <option value="1" {{ ((old('transaction_type') == 1 ) || $params['transaction_type']['paramValue'] == 1) ? 'selected' : '' }}>Debit</option>
+                                                <option value="2" {{ ((old('transaction_type') == 2 ) || $params['transaction_type']['paramValue'] == 2) ? 'selected' : '' }}>Credit</option>
                                             </select>
                                             {{-- adding error_message p tag component --}}
                                             @component('components.paragraph.error_message', ['fieldName' => 'transaction_type'])
@@ -160,7 +160,7 @@
                         <h4>
                             @if(!empty($account))
                                 Ledger of <b>{{ $account->account_name }}</b>
-                                - [ {{ $params['from_date']['paramValue'] ?? 'starting' }} - {{ $params['to_date']['paramValue'] ?? 'end' }} ]
+                                - [ {{ $params['from_date']['paramValue'] ? 'From : '. $params['from_date']['paramValue'] : '' }} {{ $params['to_date']['paramValue'] ? ' - To'. $params['to_date']['paramValue'] : '' }} ]
                             @endif
                         </h4>
                     </div>

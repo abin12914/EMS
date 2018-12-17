@@ -18,12 +18,11 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 class ExpenseController extends Controller
 {
     protected $expenseRepo;
-    public $errorHead = null, $noOfRecordsPerPage = null;
+    public $errorHead = null;
 
     public function __construct(ExpenseRepository $expenseRepo)
     {
         $this->expenseRepo          = $expenseRepo;
-        $this->noOfRecordsPerPage   = config('settings.no_of_record_per_page');
         $this->errorHead            = config('settings.controller_code.ExpenseController');
     }
 
@@ -34,7 +33,7 @@ class ExpenseController extends Controller
      */
     public function index(ExpenseFilterRequest $request)
     {
-        $noOfRecords = !empty($request->get('no_of_records')) ? $request->get('no_of_records') : $this->noOfRecordsPerPage;
+        $noOfRecordsPerPage = $request->get('no_of_records') ?? config('settings.no_of_record_per_page');
         //date format conversion
         $fromDate    = empty($request->get('from_date')) ?: Carbon::createFromFormat('d-m-Y', $request->get('from_date'))->format('Y-m-d');
         $toDate      = empty($request->get('to_date')) ?: Carbon::createFromFormat('d-m-Y', $request->get('to_date'))->format('Y-m-d');
@@ -71,10 +70,10 @@ class ExpenseController extends Controller
         
         //getExpenses($whereParams=[],$orWhereParams=[],$relationalParams=[],$orderBy=['by' => 'id', 'order' => 'asc', 'num' => null], $withParams=[],$activeFlag=true)
         return view('expenses.list', [
-            'expenses'     => $this->expenseRepo->getExpenses($whereParams, [], $relationalParams, ['by' => 'id', 'order' => 'asc', 'num' => $noOfRecords], [], [], true),
+            'expenses'     => $this->expenseRepo->getExpenses($whereParams, [], $relationalParams, ['by' => 'id', 'order' => 'asc', 'num' => $noOfRecordsPerPage], [], [], true),
             'totalExpense' => $this->expenseRepo->getExpenses($whereParams, [], $relationalParams, [], ['key' => 'sum', 'value' => 'bill_amount'], [], true),
             'params'       => array_merge($whereParams, $relationalParams),
-            'noOfRecords'  => $noOfRecords,
+            'noOfRecords'  => $noOfRecordsPerPage,
         ]);
     }
 

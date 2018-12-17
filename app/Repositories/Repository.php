@@ -67,7 +67,10 @@ class Repository
         return $query;
     }
 
-    protected function aggregatesSwitch($query, $aggregates) {
+    protected function aggregatesSwitch($query, $aggregates=['key' => null, 'value' => null]) {
+        if(!isset($aggregates['key'])) {
+            return false;
+        }
         switch (strtolower($aggregates['key'])) {
             case 'count':
                 $query = $query->count();

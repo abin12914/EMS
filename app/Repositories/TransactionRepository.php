@@ -7,7 +7,7 @@ use Auth;
 use Exception;
 use App\Exceptions\AppCustomException;
 
-class TransactionRepository
+class TransactionRepository extends Repository
 {
     public $repositoryCode, $errorCode = 0, $transactionRelations=[], $loop = 0;
 
@@ -16,6 +16,7 @@ class TransactionRepository
         $this->repositoryCode       = config('settings.repository_code.TransactionRepository');
         $this->transactionRelations = config('constants.transactionRelations');
     }
+    
     /**
      * Return transactions.
      */
@@ -137,5 +138,43 @@ class TransactionRepository
             'flag'      => false,
             'errorCode' => $this->repositoryCode + 6,
         ];
+    }
+
+    /**
+     * Return transactions.
+     */
+    public function groupTransactions(
+        $whereParams=[],
+        $orWhereParams=[],
+        $relationalParams=[],
+        $orderBy=['by' => 'id', 'order' => 'asc', 'num' => null],
+        $withParams=[],
+        $groupBy=null,
+        $activeFlag=true
+    ){
+        $transactions = [];
+        if(empty($groupBy)) {
+            return false;
+        }
+
+        try {
+            $transactions = empty($withParams) ? Transaction::query() : Transaction::with($withParams);
+
+            $transactions = $activeFlag ? $transactions->active() : $transactions;
+
+            $transactions = parent::whereFilter($transactions, $whereParams);
+
+            $transactions = parent::orWhereFilter($transactions, $orWhereParams);
+
+            $transactions = parent::relationalFilter($transactions, $relationalParams);
+
+            $transactions = $transactions->groupBy($groupBy);
+        } catch (Exception $e) {
+            $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 1);
+            
+            throw new AppCustomException("CustomError", $this->errorCode);
+        }
+
+        return $transactions;
     }
 }

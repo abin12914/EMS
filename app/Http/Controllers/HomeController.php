@@ -44,11 +44,8 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function dashboard(
-        PurchaseRepository $purchaseRepo,
-        SaleRepository $saleRepo,
-        AccountRepository $accountRepo
-    ){
+    public function dashboard()
+    {
         return view('users.dashboard');
     }
 
@@ -68,11 +65,11 @@ class HomeController extends Controller
         $errorCode = 0;
         $response  = [];
 
-        $inputArray['username']         = $request->get('username');
-        $inputArray['name']             = $request->get('name');
-        $inputArray['email']            = $request->get('email');
-        $inputArray['password']         = Hash::make($request->get('password'));
-        $inputArray['currentPassword']  = $request->get('currentPassword');
+        $inputArray['username']        = $request->get('username');
+        $inputArray['name']            = $request->get('name');
+        $inputArray['email']           = $request->get('email');
+        $inputArray['password']        = Hash::make($request->get('password'));
+        $inputArray['currentPassword'] = $request->get('currentPassword');
 
         if(!Hash::check($inputArray['currentPassword'], Auth::User()->password)) {
             return redirect()->back()->with("message", "Authentication Failed! Invalid password.")->with("alert-class", "error");
@@ -84,22 +81,20 @@ class HomeController extends Controller
             $user = Auth::User();
             $response = $userRepo->updateProfile($inputArray, $user);
 
+            if(!$response['flag']) {
+                throw new AppCustomException("CustomError", $response['errorCode']);
+            }
+
             DB::commit();
-            $saveFlag = true;
+
+            return redirect(route('dashboard'))->with("message", "Profile Successfully Updated!")->with("alert-class", "success");
         } catch (Exception $e) {
             //roll back in case of exceptions
             DB::rollback();
 
-            if($e->getMessage() == "CustomError") {
-                $errorCode = $e->getCode();
-            } else {
-                $errorCode = 1;
-            }
+            $errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : 1);
         }
 
-        if($saveFlag) {
-            return redirect(route('dashboard'))->with("message", "Profile Successfully Updated!")->with("alert-class", "success");
-        }
-        return redirect()->back()->with("message", "Profile Update failed! Error Code : ". $response['errorCode'])->with("alert-class", "error");
+        return redirect()->back()->with("message", "Profile Update failed! Error Code : ". $this->errorHead. "/". $errorCode)->with("alert-class", "error");
     }
 }

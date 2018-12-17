@@ -18,12 +18,11 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 class EmployeeController extends Controller
 {
     protected $employeeRepo;
-    public $errorHead = null, $noOfRecordsPerPage = null;
+    public $errorHead = null;
 
     public function __construct(EmployeeRepository $employeeRepo)
     {
         $this->employeeRepo         = $employeeRepo;
-        $this->noOfRecordsPerPage   = config('settings.no_of_record_per_page');
         $this->errorHead            = config('settings.controller_code.EmployeeController');
     }
 
@@ -34,7 +33,7 @@ class EmployeeController extends Controller
      */
     public function index(EmployeeFilterRequest $request)
     {
-        $noOfRecords    = !empty($request->get('no_of_records')) ? $request->get('no_of_records') : $this->noOfRecordsPerPage;
+        $noOfRecordsPerPage = $request->get('no_of_records') ?? config('settings.no_of_record_per_page');
 
         $whereParams = [
             'wage_type' => [
@@ -50,10 +49,10 @@ class EmployeeController extends Controller
         ];
         
         return view('employees.list', [
-                'employees'         => $this->employeeRepo->getEmployees($whereParams, [], [], ['by' => 'id', 'order' => 'asc', 'num' => $noOfRecords], $aggregates=['key' => null, 'value' => null], [], true),
+                'employees'         => $this->employeeRepo->getEmployees($whereParams, [], [], ['by' => 'id', 'order' => 'asc', 'num' => $noOfRecordsPerPage], $aggregates=['key' => null, 'value' => null], [], true),
                 'wageTypes'   => config('constants.employeeWageTypes'),
                 'params'      => $whereParams,
-                'noOfRecords' => $noOfRecords,
+                'noOfRecords' => $noOfRecordsPerPage,
             ]);
     }
 
@@ -115,7 +114,7 @@ class EmployeeController extends Controller
                     ];
                 }
 
-                $openingTransactionId = $transactionRepo->getTransactions($searchTransaction, [], [], ['by' => 'id', 'order' => 'asc', 'num' => 1], [], null, false )->id;
+                $openingTransactionId = $transactionRepo->getTransactions($searchTransaction, [], [], ['by' => 'id', 'order' => 'asc', 'num' => 1], [], [], null, false )->id;
             }
 
             //save to account table
