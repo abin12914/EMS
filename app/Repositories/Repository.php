@@ -52,6 +52,27 @@ class Repository
         return $query;
     }
 
+    protected function relationalOrFilter($query, $relationalOrParams)
+    {
+        foreach ((array)$relationalOrParams as $relationalOrParam) {
+            $query = $query->whereHas($relationalOrParam['relation'], function($qry) use($relationalOrParam) {
+                $this->loop = 0;
+                foreach((array)$relationalOrParam['params'] as $key => $param) {
+                    if(!empty($param['paramValue'])) {
+                        if($this->loop == 0) {
+                            $this->loop ++;
+                            $qry->where($param['paramName'], $param['paramOperator'], $param['paramValue']);
+                        } else {
+                            $qry->orWhere($param['paramName'], $param['paramOperator'], $param['paramValue']);
+                        }
+                    }
+                }
+            });
+        }
+
+        return $query;
+    }
+
     protected function getFilter($query, $orderBy)
     {
         if(!empty($orderBy['num'])) {

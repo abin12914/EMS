@@ -6,7 +6,7 @@ use App\Models\Voucher;
 use Exception;
 use App\Exceptions\AppCustomException;
 
-class VoucherRepository
+class VoucherRepository extends Repository
 {
     public $repositoryCode, $errorCode = 0;
 
@@ -18,44 +18,32 @@ class VoucherRepository
     /**
      * Return trucks.
      */
-    public function getVouchers($params=[], $relationalOrParams=[], $whereInParams=[], $noOfRecords=null)
-    {
+    public function getVouchers(
+        $whereParams=[],
+        $orWhereParams=[],
+        $relationalOrParams=[],
+        $orderBy=['by' => 'id', 'order' => 'asc', 'num' => null],
+        $aggregates=['key' => null, 'value' => null],
+        $withParams=[],
+        $activeFlag=true
+    ){
         $vouchers = [];
 
         try {
-            $vouchers = Voucher::with(['transaction'])->active();
+            $vouchers = empty($withParams) ? Voucher::query() : Voucher::with($withParams);
 
-            foreach ($params as $param) {
-                if(!empty($param) && !empty($param['paramValue'])) {
-                    $vouchers = $vouchers->where($param['paramName'], $param['paramOperator'], $param['paramValue']);
-                }
-            }
+            $vouchers = $activeFlag ? $vouchers->active() : $vouchers;
 
-            foreach ($whereInParams as $param) {
-                if(!empty($param) && !empty($param['paramValue']) && count($param['paramValue']) > 0) {
-                    $vouchers = $vouchers->whereIn($param['paramName'], $param['paramValue']);
-                }
-            }
-            foreach ($relationalOrParams as $param) {
-                if(!empty($param) && !empty($param['paramValue'])) {
-                    $vouchers = $vouchers->whereHas($param['relation'], function($qry) use($param) {
-                        $qry->where($param['paramName1'], $param['paramValue'])->orWhere($param['paramName2'], $param['paramValue']);
-                    });
-                }
-            }
+            $vouchers = parent::whereFilter($vouchers, $whereParams);
 
-            if(!empty($noOfRecords) && $noOfRecords > 0) {
-                $vouchers = $vouchers->paginate($noOfRecords);
-            } else {
-                $vouchers= $vouchers->get();
-            }
+            $vouchers = parent::orWhereFilter($vouchers, $orWhereParams);
+
+            $vouchers = parent::relationalOrFilter($vouchers, $relationalOrParams);
+
+            return (!empty($aggregates['key']) ? parent::aggregatesSwitch($vouchers, $aggregates) : parent::getFilter($vouchers, $orderBy));
         } catch (Exception $e) {
-            if($e->getMessage() == "CustomError") {
-                $this->errorCode = $e->getCode();
-            } else {
-                $this->errorCode = $this->repositoryCode + 1;
-            }
-
+            $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 1);
+dd($e);
             throw new AppCustomException("CustomError", $this->errorCode);
         }
 

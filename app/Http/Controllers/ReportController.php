@@ -173,9 +173,9 @@ class ReportController extends Controller
                 ]
             ];
 
-            $debitTransactions = $this->transactionRepo->groupTransactions([], [], $debitRelationalParams, [], [], 'debit_account_id', true)->select(\DB::raw('debit_account_id as id'), \DB::raw('sum(amount) as total'))->get();
+            /*$debitTransactions = $this->transactionRepo->groupTransactions([], [], $debitRelationalParams, [], [], 'debit_account_id', true)->select(\DB::raw('debit_account_id as id'), \DB::raw('sum(amount) as total'))->get();
             $creditTransactions = $this->transactionRepo->groupTransactions([], [], $creditRelationalParams, [], [], 'credit_account_id', true)->select(\DB::raw('credit_account_id as id'), \DB::raw('sum(amount) as total'))->get();
-            dd($debitTransactions);
+            dd($debitTransactions);*/
         }
 
         return view('reports.credit-list',[
