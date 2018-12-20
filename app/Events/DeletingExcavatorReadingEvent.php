@@ -9,22 +9,22 @@ use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use App\Models\Production;
+use App\Models\ExcavatorReading;
 
-class DeletingProductionEvent
+class DeletingExcavatorReadingEvent
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $production;
+    public $excavatorReading;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(Production $production)
+    public function __construct(ExcavatorReading $excavatorReading)
     {
-        $this->production = $production;
+        $this->excavatorReading = $excavatorReading;
     }
 
     /**

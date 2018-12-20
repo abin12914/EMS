@@ -16,23 +16,17 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\DeletingEmployeeWageEvent' => [
             'App\Listeners\DeletingEmployeeWageEventListener',
         ],
+        'App\Events\DeletingExcavatorReadingEvent' => [
+            'App\Listeners\DeletingExcavatorReadingEventListener',
+        ],
+        'App\Events\DeletingExcavatorRentEvent' => [
+            'App\Listeners\DeletingExcavatorRentEventListener',
+        ],
         'App\Events\DeletingExpenseEvent' => [
             'App\Listeners\DeletingExpenseEventListener',
         ],
-        'App\Events\DeletingProductionEvent' => [
-            'App\Listeners\DeletingProductionEventListener',
-        ],
-        'App\Events\DeletingPurchaseEvent' => [
-            'App\Listeners\DeletingPurchaseEventListener',
-        ],
-        'App\Events\DeletingSaleEvent' => [
-            'App\Listeners\DeletingSaleEventListener',
-        ],
         'App\Events\DeletingVoucherEvent' => [
             'App\Listeners\DeletingVoucherEventListener',
-        ],
-        'App\Events\DeletingTransportationEvent' => [
-            'App\Listeners\DeletingTransportationEventListener',
         ],
     ];
 

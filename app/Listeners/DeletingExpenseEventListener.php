@@ -28,10 +28,6 @@ class DeletingExpenseEventListener
     {
         $transaction = $event->expense->transaction()->firstOrFail();
 
-        if($event->expense->isForceDeleting()) {
-            $transaction->forceDelete();
-        } else {
-            $transaction->delete();
-        }
+        $event->expense->isForceDeleting() ? $transaction->forceDelete() : $transaction->delete();
     }
 }

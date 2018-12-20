@@ -2,23 +2,23 @@
 
 namespace App\Repositories;
 
-use App\Models\Service;
+use App\Models\ExcavatorReading;
 use Exception;
 use App\Exceptions\AppCustomException;
 
-class ServiceRepository extends Repository
+class ExcavatorReadingRepository extends Repository
 {
     public $repositoryCode, $errorCode = 0;
 
     public function __construct()
     {
-        $this->repositoryCode = config('settings.repository_code.ServiceRepository');
+        $this->repositoryCode = config('settings.repository_code.ExcavatorReadingRepository');
     }
 
     /**
-     * Return services.
+     * Return expenses.
      */
-    public function getServices(
+    public function getExcavatorReadings(
         $whereParams=[],
         $orWhereParams=[],
         $relationalParams=[],
@@ -27,99 +27,96 @@ class ServiceRepository extends Repository
         $withParams=[],
         $activeFlag=true
     ){
-        $services = [];
+        $expenses = [];
 
         try {
-            $services = empty($withParams) ? Service::query() : Service::with($withParams);
+            $expenses = empty($withParams) ? ExcavatorReading::query() : ExcavatorReading::with($withParams);
 
-            $services = $activeFlag ? $services->active() : $services;
+            $expenses = $activeFlag ? $expenses->active() : $expenses;
 
-            $services = parent::whereFilter($services, $whereParams);
+            $expenses = parent::whereFilter($expenses, $whereParams);
 
-            $services = parent::orWhereFilter($services, $orWhereParams);
+            $expenses = parent::orWhereFilter($expenses, $orWhereParams);
 
-            $services = parent::relationalFilter($services, $relationalParams);
+            $expenses = parent::relationalFilter($expenses, $relationalParams);
 
-            return (!empty($aggregates['key']) ? parent::aggregatesSwitch($services, $aggregates): parent::getFilter($services, $orderBy));
+            return (!empty($aggregates['key']) ? parent::aggregatesSwitch($expenses, $aggregates) : parent::getFilter($expenses, $orderBy));
         } catch (Exception $e) {
             $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 1);
-            
+
             throw new AppCustomException("CustomError", $this->errorCode);
         }
 
-        return $services;
+        return $expenses;
     }
 
     /**
-     * return service.
+     * return expense.
      */
-    public function getService($id, $withParams=[], $activeFlag=true)
+    public function getExcavatorReading($id, $withParams=[], $activeFlag=true)
     {
-        $service = [];
+        $expense = [];
 
         try {
             if(empty($withParams)) {
-                $service = Service::query();
+                $expense = ExcavatorReading::query();
             } else {
-                $service = Service::with($withParams);
+                $expense = ExcavatorReading::with($withParams);
             }
             
             if($activeFlag) {
-                $service = $service->active();
+                $expense = $expense->active();
             }
 
-            $service = $service->findOrFail($id);
+            $expense = $expense->findOrFail($id);
         } catch (Exception $e) {
             $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 2);
-            
+
             throw new AppCustomException("CustomError", $this->errorCode);
         }
 
-        return $service;
+        return $expense;
     }
 
     /**
-     * Action for saving services.
+     * Action for expense save.
      */
-    public function saveService($inputArray=[], $id=null)
+    public function saveExcavatorReading($inputArray=[], $id=null)
     {
-        $saveFlag   = false;
-
         try {
             //find record with id or create new if none exist
-            $service = Service::findOrNew($id);
+            $expense = ExcavatorReading::findOrNew($id);
 
             foreach ($inputArray as $key => $value) {
-                $service->$key = $value;
+                $expense->$key = $value;
             }
-            //service save
-            $service->save();
+            //expense save
+            $expense->save();
 
             return [
                 'flag'    => true,
-                'service' => $service,
+                'expense' => $expense,
             ];
         } catch (Exception $e) {
             $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 3);
-            
+
             throw new AppCustomException("CustomError", $this->errorCode);
         }
         return [
             'flag'      => false,
-            'errorCode' => $this->repositoryCode + 4,
+            'errorCode' => $this->repositoryCode + 3,
         ];
     }
 
-    public function deleteService($id, $forceFlag=false)
+    public function deleteExcavatorReading($id, $forceFlag=false)
     {
-        $deleteFlag = false;
-
         try {
-            $service = $this->getService($id, [], false);
+            //get expense
+            $expense = $this->getExcavatorReading($id, [], false);
 
             //force delete or soft delete
-            //related records will be deleted by deleting event handlers
-            $forceFlag ? $service->forceDelete() : $service->delete();
+            //related models will be deleted by deleting event handlers
+            $forceFlag ? $expense->forceDelete() : $expense->delete();
             
             return [
                 'flag'  => true,
@@ -130,10 +127,9 @@ class ServiceRepository extends Repository
             
             throw new AppCustomException("CustomError", $this->errorCode);
         }
-
         return [
-            'flag'      => false,
-            'errorCode' => $this->repositoryCode + 6,
+            'flag'          => false,
+            'errorCode'    => $this->repositoryCode + 6,
         ];
     }
 }

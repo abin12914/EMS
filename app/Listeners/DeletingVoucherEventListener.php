@@ -28,10 +28,6 @@ class DeletingVoucherEventListener
     {
         $transaction = $event->voucher->transaction()->firstOrFail();
 
-        if($event->voucher->isForceDeleting()) {
-            $transaction->forceDelete();
-        } else {
-            $transaction->delete();
-        }
+        $event->voucher->isForceDeleting() ? $transaction->forceDelete() : $transaction->delete();
     }
 }

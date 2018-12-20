@@ -26,6 +26,30 @@ class Account extends Model
     {
         return $query->where('status', 1);
     }
+
+    /**
+     * Get the user record who created the account.
+     */
+    public function creator()
+    {
+        return $this->belongsTo('App\Models\User');
+    }
+
+    /**
+     * Get the user record who last updated the account.
+     */
+    public function updater()
+    {
+        return $this->belongsTo('App\Models\User');
+    }
+
+    /**
+     * Get the user record who deleted the account.
+     */
+    public function deleter()
+    {
+        return $this->belongsTo('App\Models\User');
+    }
     
     /**
      * Get the employee record associated with the account.

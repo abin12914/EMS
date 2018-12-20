@@ -16,15 +16,6 @@ class Employee extends Model
      * @var array
      */
     protected $dates = ['deleted_at'];
-
-    /**
-     * The event map for the model.
-     *
-     * @var array
-     */
-    protected $dispatchesEvents = [
-        //'deleting' => DeletingEmployeeEvent::class,
-    ];
     
     /**
      * Scope a query to only include active employees.
@@ -35,6 +26,30 @@ class Employee extends Model
     public function scopeActive($query)
     {
         return $query->where('status', 1);
+    }
+
+    /**
+     * Get the user record who created the account.
+     */
+    public function creator()
+    {
+        return $this->belongsTo('App\Models\User');
+    }
+
+    /**
+     * Get the user record who last updated the account.
+     */
+    public function updater()
+    {
+        return $this->belongsTo('App\Models\User');
+    }
+
+    /**
+     * Get the user record who deleted the account.
+     */
+    public function deleter()
+    {
+        return $this->belongsTo('App\Models\User');
     }
 
     /**

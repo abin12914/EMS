@@ -28,10 +28,6 @@ class DeletingEmployeeWageEventListener
     {
         $transaction = $event->employeeWage->transaction()->firstOrFail();
 
-        if($event->employeeWage->isForceDeleting()) {
-            $transaction->forceDelete();
-        } else {
-            $transaction->delete();
-        }
+        $event->employeeWage->isForceDeleting() ? $transaction->forceDelete() : $transaction->delete();
     }
 }
