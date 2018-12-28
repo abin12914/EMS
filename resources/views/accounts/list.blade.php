@@ -35,7 +35,7 @@
                                                 <option value="">Select relation type</option>
                                                 @if(!empty($relationTypes) && (count($relationTypes) > 0))
                                                     @foreach($relationTypes as $key => $relationType)
-                                                        <option value="{{ $key }}" {{ (old('relation_type') == $key || $params['relation_type'] == $key) ? 'selected' : '' }}>{{ $relationType }}</option>
+                                                        <option value="{{ $key }}" {{ (old('relation_type') == $key || $params['relation_type']['paramValue'] == $key) ? 'selected' : '' }}>{{ $relationType }}</option>
                                                     @endforeach
                                                 @endif
                                             </select>
@@ -46,7 +46,7 @@
                                         <div class="col-md-4">
                                             <label for="account_id" class="control-label">Account : </label>
                                             {{-- adding account select component --}}
-                                            @component('components.selects.accounts', ['selectedAccountId' => $params['account_id'], 'cashAccountFlag' => false, 'selectName' => 'account_id', 'activeFlag' => false, 'tabindex' => 2])
+                                            @component('components.selects.accounts', ['selectedAccountId' => $params['account_id']['paramValue'], 'cashAccountFlag' => false, 'selectName' => 'account_id', 'activeFlag' => false, 'tabindex' => 2])
                                             @endcomponent
                                             {{-- adding error_message p tag component --}}
                                             @component('components.paragraph.error_message', ['fieldName' => 'account_id'])
@@ -86,7 +86,7 @@
                     {{-- page header for printers --}}
                     @include('sections.print-head')
                     <div class="box-header no-print">
-                        @if(!empty($params['relation_type']) || !empty($params['account_id']))
+                        @if(!empty($params['relation_type']['paramValue']) || !empty($params['account_id']['paramValue']))
                             <b>Filters applied!</b>
                         @endif
                     </div>

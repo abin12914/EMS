@@ -26,52 +26,29 @@
                         <i class="fa fa-dashboard"></i> <span>Dashboard</span>
                     </a>
                 </li>
-                @if($loggedUser->isSuperAdmin())
-                    <li class="treeview {{ (Request::is('branch/*') || Request::is('branch'))? 'active' : '' }}">
+                {{-- @if($loggedUser->isSuperAdmin())
+                    <li class="treeview {{ (Request::is('company/*') || Request::is('company'))? 'active' : '' }}">
                         <a href="#">
                             <i class="fa fa-industry"></i>
-                            <span>Branch</span>
+                            <span>Company</span>
                             <span class="pull-right-container">
                                 <i class="fa fa-angle-left pull-right"></i>
                             </span>
                         </a>
                         <ul class="treeview-menu">
-                            <li class="{{ Request::is('branch/create')? 'active' : '' }}">
-                                <a href="{{ route('branch.create') }}">
+                            <li class="{{ Request::is('company/create')? 'active' : '' }}">
+                                <a href="{{ route('company.create') }}">
                                     <i class="fa fa-circle-o text-yellow"></i> Register
                                 </a>
                             </li>
-                            <li class="{{ Request::is('branch')? 'active' : '' }}">
-                                <a href="{{ route('branch.index') }}">
+                            <li class="{{ Request::is('company')? 'active' : '' }}">
+                                <a href="{{ route('company.index') }}">
                                     <i class="fa fa-circle-o text-aqua"></i> List
                                 </a>
                             </li>
                         </ul>
                     </li>
-                @endif
-                @if($loggedUser->isSuperAdmin() || $loggedUser->isAdmin())
-                    <li class="treeview {{ (Request::is('product/*') || Request::is('product'))? 'active' : '' }}">
-                        <a href="#">
-                            <i class="fa fa-industry"></i>
-                            <span>Product</span>
-                            <span class="pull-right-container">
-                                <i class="fa fa-angle-left pull-right"></i>
-                            </span>
-                        </a>
-                        <ul class="treeview-menu">
-                            <li class="{{ Request::is('product/create')? 'active' : '' }}">
-                                <a href="{{ route('product.create') }}">
-                                    <i class="fa fa-circle-o text-yellow"></i> Register
-                                </a>
-                            </li>
-                            <li class="{{ Request::is('product')? 'active' : '' }}">
-                                <a href="{{ route('product.index') }}">
-                                    <i class="fa fa-circle-o text-aqua"></i> List
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                @endif
+                @endif --}}
                 @if($loggedUser->isSuperAdmin() || $loggedUser->isAdmin() || $loggedUser->isUser())
                     <li class="treeview {{ Request::is('reports/*')? 'active' : '' }}">
                         <a href="#">
@@ -87,50 +64,29 @@
                                     <i class="fa fa-circle-o text-green"></i> Account Statement
                                 </a>
                             </li>
-                            <li class="{{ Request::is('reports/credir-list')? 'active' : '' }}">
+                            {{-- <li class="{{ Request::is('reports/credir-list')? 'active' : '' }}">
                                 <a href="{{ route('report.credit.list') }}">
                                     <i class="fa fa-circle-o text-green"></i> Credit List
                                 </a>
-                            </li>
+                            </li> --}}
                         </ul>
                     </li>
-                    <li class="treeview {{ ( Request::is('purchase/*') || Request::is('purchase') )? 'active' : '' }}">
+                    <li class="treeview {{ Request::is('employee-wage/*') || Request::is('employee-wage')? 'active' : '' }}">
                         <a href="#">
-                            <i class="fa fa-line-chart"></i>
-                            <span>Purchase</span>
+                            <i class="fa fa-user"></i>
+                            <span>Employee-Wage</span>
                             <span class="pull-right-container">
                                 <i class="fa fa-angle-left pull-right"></i>
                             </span>
                         </a>
                         <ul class="treeview-menu">
-                            <li class="{{ Request::is('purchase/create')? 'active' : '' }}">
-                                <a href="{{ route('purchase.create') }}">
+                            <li class="{{ Request::is('employee-wage/create')? 'active' : '' }}">
+                                <a href="{{route('employee-wage.create') }}">
                                     <i class="fa fa-circle-o text-yellow"></i> Register
                                 </a>
                             </li>
-                            <li class="{{ Request::is('purchase')? 'active' : '' }}">
-                                <a href="{{ route('purchase.index') }}">
-                                    <i class="fa fa-circle-o text-aqua"></i> List
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li class="treeview {{ ( Request::is('sale/*') || Request::is('sale') )? 'active' : '' }}">
-                        <a href="#">
-                            <i class="fa fa-cart-arrow-down"></i>
-                            <span>Sale</span>
-                            <span class="pull-right-container">
-                                <i class="fa fa-angle-left pull-right"></i>
-                            </span>
-                        </a>
-                        <ul class="treeview-menu">
-                            <li class="{{ Request::is('sale/create')? 'active' : '' }}">
-                                <a href="{{ route('sale.create') }}">
-                                    <i class="fa fa-circle-o text-yellow"></i> Register
-                                </a>
-                            </li>
-                            <li class="{{ Request::is('sale')? 'active' : '' }}">
-                                <a href="{{ route('sale.index') }}">
+                            <li class="{{ Request::is('employee-wage')? 'active' : '' }}">
+                                <a href="{{route('employee-wage.index') }}">
                                     <i class="fa fa-circle-o text-aqua"></i> List
                                 </a>
                             </li>

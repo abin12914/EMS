@@ -15,7 +15,7 @@ class ExcavatorReading extends Model
      *
      * @var array
      */
-    protected $dates = ['date', 'deleted_at'];
+    protected $dates = ['reading_date', 'deleted_at'];
 
     public $timestamps = false;
 
@@ -40,7 +40,55 @@ class ExcavatorReading extends Model
     }
 
     /**
-     * Get the transaction details related to the employee wage
+     * Get the user record who created the record.
+     */
+    public function creator()
+    {
+        return $this->belongsTo('App\Models\User');
+    }
+
+    /**
+     * Get the user record who last updated the record.
+     */
+    public function updater()
+    {
+        return $this->belongsTo('App\Models\User');
+    }
+
+    /**
+     * Get the user record who deleted the record.
+     */
+    public function deleter()
+    {
+        return $this->belongsTo('App\Models\User');
+    }
+
+    /**
+     * Get the excavator details related to the excavator reading
+     */
+    public function excavator()
+    {
+        return $this->belongsTo('App\Models\Excavator');
+    }
+
+    /**
+     * Get the site details related to the excavator reading
+     */
+    public function site()
+    {
+        return $this->belongsTo('App\Models\Site');
+    }
+
+    /**
+     * Get the operator details related to the excavator reading
+     */
+    public function operator()
+    {
+        return $this->belongsTo('App\Models\Employee');
+    }
+
+    /**
+     * Get the transaction details related to the excavator reading
      */
     public function transaction()
     {

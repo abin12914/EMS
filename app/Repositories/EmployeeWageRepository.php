@@ -6,7 +6,7 @@ use App\Models\EmployeeWage;
 use Exception;
 use App\Exceptions\AppCustomException;
 
-class EmployeeWageRepository
+class EmployeeWageRepository extends Repository
 {
     public $repositoryCode, $errorCode = 0, $loop = 0;
 

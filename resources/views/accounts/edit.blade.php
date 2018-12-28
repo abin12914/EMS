@@ -90,19 +90,10 @@
                                                     @endcomponent
                                                 </div>
                                             </div>
-                                            <div class="form-group" style="display: none;">
-                                                <label for="image_file" class="col-md-3 control-label">Image : </label>
-                                                <div class="col-md-9">
-                                                    <input type="file" name="image_file" class="form-control" id="image_file" value="{{ old('image_file') }}" tabindex="6" accept="image/*">
-                                                    {{-- adding error_message p tag component --}}
-                                                    @component('components.paragraph.error_message', ['fieldName' => 'image_file'])
-                                                    @endcomponent
-                                                </div>
-                                            </div>
                                             <div class="form-group">
                                                 <label for="relation_type" class="col-md-3 control-label"><b style="color: red;">* </b> Primary Relation : </label>
                                                 <div class="col-md-9">
-                                                    <select class="form-control select2" name="relation_type" id="relation_type" tabindex="7" style="width: 100%;">
+                                                    <select class="form-control select2" name="relation_type" id="relation_type" tabindex="6" style="width: 100%;">
                                                         <option value="" {{ empty(old('relation_type')) ? 'selected' : '' }}>Select primary relation type</option>
                                                         @if(!empty($relationTypes))
                                                             @foreach($relationTypes as $key => $relationType)
@@ -124,7 +115,7 @@
                                             <div class="form-group">
                                                 <label for="financial_status" class="col-md-3 control-label"><b style="color: red;">* </b> Financial Status : </label>
                                                 <div class="col-md-9">
-                                                    <select class="form-control select2" name="financial_status" id="financial_status" tabindex="8" style="width: 100%;">
+                                                    <select class="form-control select2" name="financial_status" id="financial_status" tabindex="7" style="width: 100%;">
                                                         <option value="0" {{ (old('financial_status', $account->financial_status) == '0') ? 'selected' : '' }}>None (No pending transactions)</option>
                                                         <option value="2" {{ (old('financial_status', $account->financial_status) == '2') ? 'selected' : '' }}>Debitor (Account holder owe to the company)</option>
                                                         <option value="1" {{ (old('financial_status', $account->financial_status) == '1') ? 'selected' : '' }}>Creditor (Company owe to the account holder)</option>
@@ -137,7 +128,7 @@
                                             <div class="form-group">
                                                 <label for="opening_balance" class="col-md-3 control-label"><b style="color: red;">* </b> Opening Balance : </label>
                                                 <div class="col-md-9">
-                                                    <input type="text" class="form-control decimal_number_only" name="opening_balance" id="opening_balance" placeholder="Opening balance" value="{{ old('opening_balance', $account->opening_balance) }}" {{ old('financial_status', $account->opening_balance) == '0' ? 'readonly' : '' }} tabindex="9" maxlength="8">
+                                                    <input type="text" class="form-control decimal_number_only" name="opening_balance" id="opening_balance" placeholder="Opening balance" value="{{ old('opening_balance', $account->opening_balance) }}" {{ old('financial_status', $account->opening_balance) == '0' ? 'readonly' : '' }} tabindex="8" maxlength="8">
                                                     {{-- adding error_message p tag component --}}
                                                     @component('components.paragraph.error_message', ['fieldName' => 'opening_balance'])
                                                     @endcomponent
@@ -149,10 +140,10 @@
                                     <div class="row">
                                         <div class="col-md-3"></div>
                                         <div class="col-md-3">
-                                            <button type="reset" class="btn btn-default btn-block btn-flat" tabindex="11">Clear</button>
+                                            <button type="reset" class="btn btn-default btn-block btn-flat" tabindex="10">Clear</button>
                                         </div>
                                         <div class="col-md-3">
-                                            <button type="button" class="btn btn-warning btn-block btn-flat update_button" tabindex="10">Update</button>
+                                            <button type="button" class="btn btn-warning btn-block btn-flat update_button" tabindex="9">Update</button>
                                         </div>
                                         <!-- /.col -->
                                     </div><br>

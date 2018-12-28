@@ -32,14 +32,15 @@ class VoucherRegistrationRequest extends FormRequest
                                         ],
             'voucher_account_id'    =>  [
                                             'required',
-                                            Rule::in(Account::pluck('id')->toArray()),
+                                            'exists:accounts,id',
                                         ],
-            'date'                  =>  [
+            'transaction_date'      =>  [
                                             'required',
                                             'date_format:d-m-Y',
                                         ],
             'description'           =>  [
                                             'required',
+                                            'min:4',
                                             'max:200',
                                         ],
             'amount'                =>  [

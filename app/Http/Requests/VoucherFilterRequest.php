@@ -4,8 +4,6 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Models\Account;
-
 
 class VoucherFilterRequest extends FormRequest
 {
@@ -37,7 +35,7 @@ class VoucherFilterRequest extends FormRequest
                                         ],
             'voucher_account_id'    =>  [
                                             'nullable',
-                                            Rule::in(Account::pluck('id')->toArray()),
+                                            'exists:accounts,id',
                                         ],
             'voucher_type'          =>  [
                                             'nullable',

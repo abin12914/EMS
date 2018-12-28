@@ -8,7 +8,7 @@ use Auth;
 
 class ProfileUpdateRequest extends FormRequest
 {
-    public $id;
+    public $id=null;
 
     /**
      * Determine if the user is authorized to make this request.
@@ -31,15 +31,18 @@ class ProfileUpdateRequest extends FormRequest
         return [
             'username'          =>  [
                                         'required',
+                                        'min:4',
                                         'max:100',
                                         Rule::unique('users')->ignore($this->id),
                                     ],
             'name'              =>  [
                                         'required',
+                                        'min:4',
                                         'max:100',
                                     ],
             'email'             =>  [
                                         'required',
+                                        'min:5',
                                         'email',
                                         Rule::unique('users')->ignore($this->id),
                                     ],
@@ -47,11 +50,11 @@ class ProfileUpdateRequest extends FormRequest
                                         'required',
                                     ],
             'password'          =>  [
-                                    'nullable',
-                                    'min:6',
-                                    'max:16',
-                                    'confirmed',
-                                ],
+                                        'nullable',
+                                        'min:6',
+                                        'max:16',
+                                        'confirmed',
+                                    ],
         ];
     }
 }

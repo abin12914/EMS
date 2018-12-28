@@ -26,13 +26,12 @@ Route::group(['middleware' => 'auth.check'], function () {
     Route::get('/user/profile', 'HomeController@profileView')->name('user.profile');
     Route::post('/user/profile', 'HomeController@profileUpdate')->name('user.profile.action');
 
+    Route::group(['middleware' => ['user.role:0']], function () {
+        //company
+        Route::resource('company', 'companyController');
+    });
     //user routes
     Route::group(['middleware' => ['user.role:0,1,2']], function () {
-        //branch
-        Route::resource('branch', 'BranchController');
-
-        //product
-        Route::resource('product', 'ProductController');
 
         //account
         Route::resource('account', 'AccountController');
@@ -40,13 +39,8 @@ Route::group(['middleware' => 'auth.check'], function () {
         //staff
         Route::resource('employee', 'EmployeeController');
 
-        //purchases
-        Route::get('/purchase/{id}/invoice', 'PurchaseController@invoice')->name('purchase.invoice');
-        Route::resource('purchase', 'PurchaseController');
-
-        //sales
-        Route::get('/sale/{id}/invoice', 'SaleController@invoice')->name('sale.invoice');
-        Route::resource('sale', 'SaleController');
+        //wage
+        Route::resource('employee-wage', 'EmployeeWageController');
 
         //expenses
         Route::resource('expense', 'ExpenseController');
@@ -61,7 +55,6 @@ Route::group(['middleware' => 'auth.check'], function () {
         //ajax urls
         Route::group(['middleware' => 'is.ajax'], function () {
             Route::get('/ajax/account/details/{id}', 'AccountController@getDetails')->name('ajax.account.details');
-            Route::get('/ajax/last/sale', 'SaleController@getLastSale')->name('ajax.lastsale.bybranch');
         });
     });
 });

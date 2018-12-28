@@ -4,7 +4,6 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Models\Employee;
 
 class EmployeeFilterRequest extends FormRequest
 {
@@ -25,16 +24,14 @@ class EmployeeFilterRequest extends FormRequest
      */
     public function rules()
     {
-        $wageTypes  = config('constants.employeeWageTypes');
-
         return [
             'employee_id'   =>  [
                                     'nullable',
-                                    Rule::in(Employee::pluck('id')->toArray()),
+                                    'exists:employees,id',
                                 ],
             'wage_type'     =>  [
                                     'nullable',
-                                    Rule::in(array_keys($wageTypes)),
+                                    Rule::in(array_keys(config('constants.employeeWageTypes'))),
                                 ],
             'page'          =>  [
                                     'nullable',

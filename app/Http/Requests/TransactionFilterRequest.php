@@ -4,7 +4,6 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Models\Account;
 
 class TransactionFilterRequest extends FormRequest
 {
@@ -25,8 +24,6 @@ class TransactionFilterRequest extends FormRequest
      */
     public function rules()
     {
-        $transactionRelations = config('constants.transactionRelations');
-
         return [
             'from_date'         =>  [
                                         'nullable',
@@ -38,11 +35,11 @@ class TransactionFilterRequest extends FormRequest
                                     ],
             'account_id'        =>  [
                                         'nullable',
-                                        Rule::in(Account::pluck('id')->toArray()),
+                                        'exists:accounts,id',
                                     ],
             'relation'          =>  [
                                         'nullable',
-                                        Rule::in(array_keys($transactionRelations)),
+                                        Rule::in(array_keys(config('constants.transactionRelations'))),
                                     ],
             'transaction_type'  =>  [
                                         'nullable',

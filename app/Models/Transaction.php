@@ -28,6 +28,30 @@ class Transaction extends Model
     }
 
     /**
+     * Get the user record who created the account.
+     */
+    public function creator()
+    {
+        return $this->belongsTo('App\Models\User');
+    }
+
+    /**
+     * Get the user record who last updated the account.
+     */
+    public function updater()
+    {
+        return $this->belongsTo('App\Models\User');
+    }
+
+    /**
+     * Get the user record who deleted the account.
+     */
+    public function deleter()
+    {
+        return $this->belongsTo('App\Models\User');
+    }
+
+    /**
      * Get the debit account details associated with a transaction
      */
     public function debitAccount()
@@ -44,27 +68,11 @@ class Transaction extends Model
     }
 
     /**
-     * Get the purchase record associated with the transaction.
+     * Get the excavatorReading record associated with the transaction.
      */
-    public function purchase()
+    public function excavatorReading()
     {
-        return $this->hasOne('App\Models\Purchase', 'transaction_id');
-    }
-
-    /**
-     * Get the sale record associated with the transaction.
-     */
-    public function sale()
-    {
-        return $this->hasOne('App\Models\Sale', 'transaction_id');
-    }
-
-    /**
-     * The transportation that belong to the transaction.
-     */
-    public function transportation()
-    {
-        return $this->hasOne('App\Models\Transportation', 'transaction_id');
+        return $this->hasOne('App\Models\ExcavatorReading', 'transaction_id');
     }
 
     /**

@@ -15,9 +15,7 @@ class Expense extends Model
      *
      * @var array
      */
-    protected $dates = ['date', 'deleted_at'];
-
-    public $timestamps = false;
+    protected $dates = ['expense_date', 'deleted_at'];
 
     /**
      * The event map for the model.
@@ -40,11 +38,35 @@ class Expense extends Model
     }
 
     /**
+     * Get the user record who created the record.
+     */
+    public function creator()
+    {
+        return $this->belongsTo('App\Models\User');
+    }
+
+    /**
+     * Get the user record who last updated the record.
+     */
+    public function updater()
+    {
+        return $this->belongsTo('App\Models\User');
+    }
+
+    /**
+     * Get the user record who deleted the record.
+     */
+    public function deleter()
+    {
+        return $this->belongsTo('App\Models\User');
+    }
+
+    /**
      * Get the branch details associated with the purchase
      */
-    public function branch()
+    public function excavator()
     {
-        return $this->belongsTo('App\Models\Branch','branch_id');
+        return $this->belongsTo('App\Models\Excavator');
     }
     
     /**

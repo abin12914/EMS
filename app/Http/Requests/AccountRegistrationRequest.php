@@ -24,12 +24,11 @@ class AccountRegistrationRequest extends FormRequest
      */
     public function rules()
     {
-        $relationTypes  = config('constants.accountRelationTypes');
-        
         return [
             'account_name'          =>  [
                                             'required',
                                             'max:100',
+                                            'min:3',
                                             Rule::unique('accounts')->ignore($this->account),
                                         ],
             'description'           =>  [
@@ -44,30 +43,26 @@ class AccountRegistrationRequest extends FormRequest
                                             'required',
                                             'numeric',
                                             'min:0',
-                                            'max:9999999',
+                                            'max:999999',
                                         ],
             'name'                  =>  [
                                             'required',
                                             'max:100',
+                                            'min:3',
                                         ],
             'phone'                 =>  [
                                             'required',
                                             'numeric',
                                             'digits_between:10,13',
-                                            Rule::unique('accounts')->ignore($this->account),
+                                            Rule::unique('accounts', 'phone')->ignore($this->account),
                                         ],
             'address'               =>  [
                                             'nullable',
                                             'max:200',
                                         ],
-            'image_file'            =>  [
-                                            'nullable',
-                                            'mimetypes:image/jpeg,image/jpg,image/bmp,image/png',
-                                            'max:3000',
-                                        ],
             'relation_type'         =>  [
                                             'required',
-                                            Rule::in(array_keys($relationTypes)),
+                                            Rule::in(array_keys(config('constants.accountRelationTypes'))),
                                         ],
         ];
     }

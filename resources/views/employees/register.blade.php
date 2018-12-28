@@ -63,22 +63,13 @@
                                             @endcomponent
                                         </div>
                                     </div>
-                                    <div class="form-group" style="display: none;">
-                                        <label for="image_file" class="col-md-3 control-label">Image : </label>
-                                        <div class="col-md-9">
-                                            <input type="file" name="image_file" class="form-control" id="image_file" accept="image/*" tabindex="4" value="{{ old('image_file') }}">
-                                            {{-- adding error_message p tag component --}}
-                                            @component('components.paragraph.error_message', ['fieldName' => 'image_file'])
-                                            @endcomponent
-                                        </div>
-                                    </div>
                                     <div class="box-header with-border">
                                         <h3 class="box-title" style="float: left;">Wage Details</h3>
                                     </div>
                                     <div class="form-group">
                                         <label class="col-md-3 control-label"><b style="color: red;">* </b> Wage Type : </label>
                                         <div class="col-md-9">
-                                            <select class="form-control select2" name="wage_type" id="wage_type" tabindex="5">
+                                            <select class="form-control select2" name="wage_type" id="wage_type" tabindex="4">
                                                 <option value="" {{ empty(old('wage_type')) ? 'selected' : '' }}>Select wage type</option>
                                                 @if(!empty($wageTypes))
                                                     @foreach($wageTypes as $key => $wageType)
@@ -94,7 +85,7 @@
                                     <div class="form-group">
                                         <label for="wage" class="col-md-3 control-label"><b style="color: red;">* </b> Wage : </label>
                                         <div class="col-md-9">
-                                            <input type="text" name="wage" class="form-control decimal_number_only" id="wage" placeholder="Salary/wage rate" value="{{ old('wage') }}" tabindex="6">
+                                            <input type="text" name="wage" class="form-control decimal_number_only" id="wage" placeholder="Salary/wage rate" value="{{ old('wage') }}" tabindex="5">
                                             {{-- adding error_message p tag component --}}
                                             @component('components.paragraph.error_message', ['fieldName' => 'wage'])
                                             @endcomponent
@@ -106,7 +97,7 @@
                                     <div class="form-group">
                                         <label for="account_name" class="col-md-3 control-label"><b style="color: red;">* </b> Account Name : </label>
                                         <div class="col-md-9">
-                                            <input type="text" name="account_name" class="form-control" id="account_name" placeholder="Account Name" value="{{ old('account_name') }}"  tabindex="7" maxlength="100">
+                                            <input type="text" name="account_name" class="form-control" id="account_name" placeholder="Account Name" value="{{ old('account_name') }}"  tabindex="6" maxlength="100">
                                             {{-- adding error_message p tag component --}}
                                             @component('components.paragraph.error_message', ['fieldName' => 'account_name'])
                                             @endcomponent
@@ -116,7 +107,7 @@
                                         <label class="col-md-3 control-label"><b style="color: red;">* </b> Financial Status: </label>
                                         <div class="col-md-9">
                                             {{-- adding financial_status select component --}}
-                                            @component('components.selects.financial_status', ['tabindex' => 8])
+                                            @component('components.selects.financial_status', ['tabindex' => 7])
                                             @endcomponent
                                             {{-- adding error_message p tag component --}}
                                             @component('components.paragraph.error_message', ['fieldName' => 'financial_status'])
@@ -127,7 +118,7 @@
                                         <label class="col-md-3 control-label"><b style="color: red;">* </b> Opening Balance: </label>
                                         <div class="col-md-9">
                                             {{-- adding opening_balance text component --}}
-                                            @component('components.texts.opening_balance', ['tabindex' => 9])
+                                            @component('components.texts.opening_balance', ['tabindex' => 8])
                                             @endcomponent
                                             {{-- adding error_message p tag component --}}
                                             @component('components.paragraph.error_message', ['fieldName' => 'opening_balance'])
@@ -140,11 +131,11 @@
                                 <div class="row">
                                     <div class="col-md-3"></div>
                                     <div class="col-md-3">
-                                        <button type="reset" class="btn btn-default btn-block btn-flat" tabindex="11">Clear</button>
+                                        <button type="reset" class="btn btn-default btn-block btn-flat" tabindex="10">Clear</button>
                                     </div>
                                     {{-- <div class="col-md-1"></div> --}}
                                     <div class="col-md-3">
-                                        <button type="submit" class="btn btn-primary btn-block btn-flat submit-button" tabindex="10">Submit</button>
+                                        <button type="submit" class="btn btn-primary btn-block btn-flat submit-button" tabindex="9">Submit</button>
                                     </div>
                                     <!-- /.col -->
                                 </div><br>

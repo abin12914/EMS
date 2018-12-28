@@ -5,11 +5,10 @@ namespace App\Http\ViewComposers;
 use Illuminate\View\View;
 use App\Repositories\ServiceRepository;
 use Exception;
-//use App\Exceptions\AppCustomException;
 
 class ServiceComponentComposer
 {
-    protected $services =[], $errorHead = null;
+    protected $services =[];
 
     /**
      * Create a new services partial composer.
@@ -19,19 +18,10 @@ class ServiceComponentComposer
      */
     public function __construct(ServiceRepository $serviceRepo)
     {
-        $this->errorHead    = config('settings.composer_code.ServiceComponentComposer');
-        $errorCode          = 0;
-
         try {
-            $this->services = $serviceRepo->getServices();
+            //getServices($whereParams=[],$orWhereParams=[],$relationalParams=[],$orderBy=['by' => 'id', 'order' => 'asc', 'num' => null],$aggregates=['key' => null, 'value' => null],$withParams=[],$activeFlag=true)
+            $this->services = $serviceRepo->getServices([],[],[],['by' => 'id', 'order' => 'asc', 'num' => null],['key' => null, 'value' => null],[],true);
         } catch (Exception $e) {
-            if($e->getMessage() == "CustomError") {
-                $errorCode = $e->getCode();
-            } else {
-                $errorCode = 1;
-            }
-            
-            //throw new AppCustomException("CustomError", ($this->errorHead + $errorCode));
         }
     }
 

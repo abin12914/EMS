@@ -3,10 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
-use App\Models\Branch;
-use App\Models\Service;
-use App\Models\Account;
 
 class ExpenseFilterRequest extends FormRequest
 {
@@ -38,11 +34,11 @@ class ExpenseFilterRequest extends FormRequest
                                         ],
             'supplier_account_id'   =>  [
                                             'nullable',
-                                            Rule::in(Account::pluck('id')->toArray()),
+                                            'exists:expenses,id',
                                         ],
             'service_id'            =>  [
                                             'nullable',
-                                            Rule::in(Service::pluck('id')->toArray()),
+                                            'exists:services,id',
                                         ],
             'no_of_records'         =>  [
                                             'nullable',

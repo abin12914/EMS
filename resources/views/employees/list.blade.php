@@ -117,7 +117,7 @@
                                                     @else
                                                         <td>Error</td>
                                                     @endif
-                                                    <td>{{ $employee->wage_rate }}</td>
+                                                    <td>{{ $employee->wage }}</td>
                                                     <td>{{ $employee->account->account_name }}</td>
                                                     <td class="no-print">
                                                         <a href="{{ route('employee.show', ['id' => $employee->id]) }}">

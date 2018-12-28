@@ -151,7 +151,7 @@ class ExpenseController extends Controller
                 ];
             }
 
-            return redirect(route('expense.index'))->with("message","Expense details saved successfully. Reference Number : ". $transactionResponse['expense'])->with("alert-class", "success");
+            return redirect(route('expense.index'))->with("message","Expense details saved successfully. Reference Number : ". $transactionResponse['transaction']->id)->with("alert-class", "success");
         } catch (Exception $e) {
             //roll back in case of exceptions
             DB::rollback();
@@ -236,7 +236,6 @@ class ExpenseController extends Controller
         }
         
         return redirect()->back()->with("message","Failed to update the expenses details. Error Code : ". $this->errorHead. "/". $updateResponse['errorCode'])->with("alert-class", "error");
-
     }
 
     /**

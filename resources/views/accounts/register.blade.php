@@ -88,19 +88,10 @@
                                                 @endcomponent
                                             </div>
                                         </div>
-                                        <div class="form-group" style="display: none;">
-                                            <label for="image_file" class="col-md-3 control-label">Image : </label>
-                                            <div class="col-md-9">
-                                                <input type="file" name="image_file" class="form-control" id="image_file" value="{{ old('image_file') }}" tabindex="6" accept="image/*">
-                                                {{-- adding error_message p tag component --}}
-                                                @component('components.paragraph.error_message', ['fieldName' => 'image_file'])
-                                                @endcomponent
-                                            </div>
-                                        </div>
                                         <div class="form-group">
                                             <label for="relation_type" class="col-md-3 control-label"><b style="color: red;">* </b> Primary Relation : </label>
                                             <div class="col-md-9">
-                                                <select class="form-control select2" name="relation_type" id="relation_type" tabindex="7" style="width: 100%;">
+                                                <select class="form-control select2" name="relation_type" id="relation_type" tabindex="6" style="width: 100%;">
                                                     <option value="" {{ empty(old('relation_type')) ? 'selected' : '' }}>Select primary relation type</option>
                                                     @if(!empty($relationTypes))
                                                         @foreach($relationTypes as $key => $relationType)
@@ -123,7 +114,7 @@
                                             <label for="financial_status" class="col-md-3 control-label"><b style="color: red;">* </b> Financial Status : </label>
                                             <div class="col-md-9">
                                                 {{-- adding financial_status select component --}}
-                                                @component('components.selects.financial_status', ['tabindex' => 8])
+                                                @component('components.selects.financial_status', ['tabindex' => 7])
                                                 @endcomponent
                                                 {{-- adding error_message p tag component --}}
                                                 @component('components.paragraph.error_message', ['fieldName' => 'financial_status'])
@@ -134,7 +125,7 @@
                                             <label for="opening_balance" class="col-md-3 control-label"><b style="color: red;">* </b> Opening Balance : </label>
                                             <div class="col-md-9">
                                                 {{-- adding opening_balance text component --}}
-                                                @component('components.texts.opening_balance', ['tabindex' => 9])
+                                                @component('components.texts.opening_balance', ['tabindex' => 8])
                                                 @endcomponent
                                                 {{-- adding error_message p tag component --}}
                                                 @component('components.paragraph.error_message', ['fieldName' => 'opening_balance'])
@@ -147,10 +138,10 @@
                                 <div class="row">
                                     <div class="col-md-3"></div>
                                     <div class="col-md-3">
-                                        <button type="reset" class="btn btn-default btn-block btn-flat" tabindex="11">Clear</button>
+                                        <button type="reset" class="btn btn-default btn-block btn-flat" tabindex="10">Clear</button>
                                     </div>
                                     <div class="col-md-3">
-                                        <button type="submit" class="btn btn-primary btn-block btn-flat submit-button" tabindex="10">Submit</button>
+                                        <button type="submit" class="btn btn-primary btn-block btn-flat submit-button" tabindex="9">Submit</button>
                                     </div>
                                     <!-- /.col -->
                                 </div><br>

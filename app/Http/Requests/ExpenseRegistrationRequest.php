@@ -4,8 +4,6 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Models\Service;
-use App\Models\Account;
 
 class ExpenseRegistrationRequest extends FormRequest
 {
@@ -33,11 +31,15 @@ class ExpenseRegistrationRequest extends FormRequest
                                         ],
             'supplier_account_id'   =>  [
                                             'required',
-                                            Rule::in(Account::pluck('id')->toArray()),
+                                            'exists:accounts,id',
+                                        ],
+            'excavator_id'          =>  [
+                                            'required',
+                                            'exists:excavators,id',
                                         ],
             'service_id'            =>  [
                                             'required',
-                                            Rule::in(Service::pluck('id')->toArray()),
+                                            'exists:services,id',
                                         ],
             'description'           =>  [
                                             'required',

@@ -4,10 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Excavator extends Model
+class Site extends Model
 {
     /**
-     * Get the user record who created the record.
+     * Get the user record who created the account.
      */
     public function creator()
     {
@@ -15,7 +15,7 @@ class Excavator extends Model
     }
 
     /**
-     * Get the user record who last updated the record.
+     * Get the user record who last updated the account.
      */
     public function updater()
     {
@@ -23,7 +23,7 @@ class Excavator extends Model
     }
 
     /**
-     * Get the user record who deleted the record.
+     * Get the user record who deleted the account.
      */
     public function deleter()
     {

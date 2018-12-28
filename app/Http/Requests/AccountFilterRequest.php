@@ -4,7 +4,6 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Models\Account;
 
 class AccountFilterRequest extends FormRequest
 {
@@ -25,16 +24,14 @@ class AccountFilterRequest extends FormRequest
      */
     public function rules()
     {
-        $relationTypes  = config('constants.accountRelationTypes');
-
         return [
             'relation_type' =>  [
                                     'nullable',
-                                    Rule::in(array_keys($relationTypes)),
+                                    Rule::in(array_keys(config('constants.accountRelationTypes'))),
                                 ],
             'account_id'    =>  [
                                     'nullable',
-                                    Rule::in(Account::pluck('id')->toArray()),
+                                    'exists:accounts,id'
                                 ],
             'no_of_records' =>  [
                                     'nullable',

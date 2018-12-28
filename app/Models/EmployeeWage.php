@@ -15,7 +15,7 @@ class EmployeeWage extends Model
      *
      * @var array
      */
-    protected $dates = ['date', 'deleted_at'];
+    protected $dates = ['from_date', 'to_date', 'deleted_at'];
 
     /**
      * The event map for the model.
