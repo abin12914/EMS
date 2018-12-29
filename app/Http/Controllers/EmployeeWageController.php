@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Repositories\EmployeeWageRepository;
 use App\Repositories\TransactionRepository;
+use App\Repositories\EmployeeRepository;
 use App\Repositories\AccountRepository;
 use App\Http\Requests\EmployeeWageRegistrationRequest;
 use App\Http\Requests\EmployeeWageFilterRequest;
@@ -88,6 +89,7 @@ class EmployeeWageController extends Controller
     public function store(
         EmployeeWageRegistrationRequest $request,
         TransactionRepository $transactionRepo,
+        EmployeeRepository $employeeRepo,
         AccountRepository $accountRepo,
         $id=null
     ) {
@@ -96,8 +98,8 @@ class EmployeeWageController extends Controller
 
         $employeeWageAccountId = config('constants.accountConstants.EmployeeWage.id');
         //date format conversion
-        $fromDate    = empty($request->get('from_date')) ?: Carbon::createFromFormat('d-m-Y', $request->get('from_date'))->format('Y-m-d');
-        $toDate      = empty($request->get('to_date')) ? $fromDate : Carbon::createFromFormat('d-m-Y', $request->get('to_date'))->format('Y-m-d');
+        $fromDate    = Carbon::createFromFormat('d-m-Y', $request->get('from_date'));
+        $toDate      = empty($request->get('to_date')) ? $fromDate : Carbon::createFromFormat('d-m-Y', $request->get('to_date'));
 
         //wrappin db transactions
         DB::beginTransaction();
@@ -106,6 +108,7 @@ class EmployeeWageController extends Controller
 
             //confirming employeeWage account exist-ency.
             $employeeWageAccount = $accountRepo->getAccount($employeeWageAccountId, [], false);
+            $employee = $employeeRepo->getEmployee($request->get('employee_id'), ['account'], false);
             if (!empty($id)) {
                 $employeeWageTransactionId = $this->employeeWageRepo->getEmployeeWage($id, [], false)->id;
             }
@@ -113,10 +116,10 @@ class EmployeeWageController extends Controller
             //save employeeWage transaction to table
             $transactionResponse   = $transactionRepo->saveTransaction([
                 'debit_account_id'  => $employeeWageAccountId, // debit the employeeWage account
-                'credit_account_id' => $request->get('employee_id'), // credit the employee
+                'credit_account_id' => $employee->account_id, // credit the employee
                 'amount'            => $request->get('wage_amount'),
-                'transaction_date'  => $toDate,
-                'particulars'       => $request->get('description')."[Employee Wage]",
+                'transaction_date'  => $toDate->format('Y-m-d'),
+                'particulars'       => ($request->get('description'). "[Employee Wage of ". $employee->account->account_name. "- From : ". $request->get('from_date'). " To : ". (empty($request->get('to_date')) ? $request->get('from_date') : $request->get('to_date')). "]"),
                 'status'            => 1,
                 'company_id'        => $user->company_id,
             ], $employeeWageTransactionId);
@@ -130,8 +133,8 @@ class EmployeeWageController extends Controller
                 'employee_id'    => $request->get('employee_id'),
                 'transaction_id' => $transactionResponse['transaction']->id,
                 'wage_type'      => ($fromDate->diffInDays($toDate) > 8) ? 1 : 2, //1 => salary 2 => wage
-                'from_date'      => $fromDate,
-                'to_date'        => $toDate,
+                'from_date'      => $fromDate->format('Y-m-d'),
+                'to_date'        => $toDate->format('Y-m-d'),
                 'wage'           => $request->get('wage_amount'),
                 'description'    => $request->get('description'),
                 'status'         => 1,
@@ -142,6 +145,9 @@ class EmployeeWageController extends Controller
             if(!$employeeWageResponse['flag']) {
                 throw new AppCustomException("CustomError", $employeeWageResponse['errorCode']);
             }
+
+            DB::commit();
+
             if(!empty($id)) {
                 return [
                     'flag'         => true,
@@ -149,7 +155,7 @@ class EmployeeWageController extends Controller
                 ];
             }
 
-            return redirect(route('employeeWage.index'))->with("message","EmployeeWage details saved successfully. Reference Number : ". $transactionResponse['transaction']->id)->with("alert-class", "success");
+            return redirect(route('employee-wage.index'))->with("message","EmployeeWage details saved successfully. Reference Number : ". $transactionResponse['transaction']->id)->with("alert-class", "success");
         } catch (Exception $e) {
             //roll back in case of exceptions
             DB::rollback();
@@ -224,13 +230,14 @@ class EmployeeWageController extends Controller
     public function update(
         EmployeeWageRegistrationRequest $request,
         TransactionRepository $transactionRepo,
+        EmployeeRepository $employeeRepo,
         AccountRepository $accountRepo,
         $id
     ) {
-        $updateResponse = $this->store($request, $transactionRepo, $accountRepo, $id);
+        $updateResponse = $this->store($request, $transactionRepo, $employeeRepo, $accountRepo, $id);
 
         if($updateResponse['flag']) {
-            return redirect(route('employeeWages.show', $updateResponse['employeeWage']->id))->with("message","EmployeeWages details updated successfully. Updated Record Number : ". $updateResponse['employeeWage']->id)->with("alert-class", "success");
+            return redirect(route('employee-wage.index'))->with("message","EmployeeWages details updated successfully. Updated Record Number : ". $updateResponse['employeeWage']->id)->with("alert-class", "success");
         }
         
         return redirect()->back()->with("message","Failed to update the employeeWages details. Error Code : ". $this->errorHead. "/". $updateResponse['errorCode'])->with("alert-class", "error");
@@ -256,7 +263,7 @@ class EmployeeWageController extends Controller
             }
             
             DB::commit();
-            return redirect(route('employeeWage.index'))->with("message","EmployeeWage details deleted successfully.")->with("alert-class", "success");
+            return redirect(route('employee-wage.index'))->with("message","EmployeeWage details deleted successfully.")->with("alert-class", "success");
         } catch (Exception $e) {
             //roll back in case of exceptions
             DB::rollback();

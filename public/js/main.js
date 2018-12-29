@@ -34,6 +34,14 @@ $(function () {
         autoclose: true,
     });
 
+    //Date picker for edit
+    $('.datepicker_edit').datepicker({
+        todayHighlight: true,
+        endDate: '+0d',
+        format: 'dd-mm-yyyy',
+        autoclose: true,
+    });
+
     if(typeof defaultDate !== 'undefined') {
         //setting user setting date as selected
         $('.datepicker_reg').datepicker('setDate', defaultDate);

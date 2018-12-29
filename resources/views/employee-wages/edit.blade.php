@@ -27,9 +27,10 @@
                         </div><br>
                         <!-- /.box-header -->
                         <!-- form start -->
-                        <form action="{{route('employee-wage.store')}}" method="post" class="form-horizontal" autocomplete="off">
+                        <form action="{{route('employee-wage.update', $employeeWage->id)}}" method="post" class="form-horizontal" autocomplete="off">
                             <div class="box-body">
-                                <input type="hidden" name="_token" value="{{csrf_token()}}">
+                                @csrf
+                                @method('PUT')
                                 <div class="row">
                                     <div class="col-md-1"></div>
                                     <div class="col-md-10">
@@ -46,7 +47,7 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label for="from_date" class="control-label"><b style="color: red;">* </b> From Date : </label>
-                                                    <input type="text" class="form-control decimal_number_only datepicker_reg" name="from_date" id="from_date" placeholder="From date" value="{{ old('from_date', $employeeWage->from_date) }}" tabindex="2">
+                                                    <input type="text" class="form-control decimal_number_only datepicker_edit" name="from_date" id="from_date" placeholder="From date" value="{{ old('from_date', $employeeWage->from_date->format('d-m-Y')) }}" tabindex="2">
                                                     {{-- adding error_message p tag component --}}
                                                     @component('components.paragraph.error_message', ['fieldName' => 'from_date'])
                                                     @endcomponent
@@ -57,7 +58,7 @@
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <label for="to_date" class="control-label">To Date [Use only if generating wage for multiple days] : </label>
-                                                    <input type="text" class="form-control decimal_number_only datepicker_reg" name="to_date" id="to_date" placeholder="To date" value="{{ old('to_date', $employeeWage->to_date) }}" tabindex="3">
+                                                    <input type="text" class="form-control decimal_number_only datepicker_edit" name="to_date" id="to_date" placeholder="To date" value="{{ old('to_date', $employeeWage->to_date->format('d-m-Y')) }}" tabindex="3">
                                                     {{-- adding error_message p tag component --}}
                                                     @component('components.paragraph.error_message', ['fieldName' => 'to_date'])
                                                     @endcomponent
@@ -76,9 +77,9 @@
                                                 <div class="col-md-12">
                                                     <label for="description" class="control-label"><b style="color: red;">* </b> Description: </label>
                                                     @if(!empty(old('description')))
-                                                        <textarea class="form-control" name="description" id="description" rows="2" placeholder="Description" style="resize: none;" tabindex="5">{{ old('description', $employeeWage->description) }}</textarea>
+                                                        <textarea class="form-control" name="description" id="description" rows="2" placeholder="Description" style="resize: none;" tabindex="5">{{ old('description') }}</textarea>
                                                     @else
-                                                        <textarea class="form-control" name="description" id="description" rows="2" placeholder="Description" style="resize: none;" tabindex="5"></textarea>
+                                                        <textarea class="form-control" name="description" id="description" rows="2" placeholder="Description" style="resize: none;" tabindex="5">{{ $employeeWage->description }}</textarea>
                                                     @endif
                                                     {{-- adding error_message p tag component --}}
                                                     @component('components.paragraph.error_message', ['fieldName' => 'description'])

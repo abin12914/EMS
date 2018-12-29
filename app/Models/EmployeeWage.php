@@ -68,4 +68,12 @@ class EmployeeWage extends Model
     {
         return $this->belongsTo('App\Models\Transaction');
     }
+
+    /**
+     * Get the employee details related to the employee wage
+     */
+    public function employee()
+    {
+        return $this->belongsTo('App\Models\Employee');
+    }
 }
