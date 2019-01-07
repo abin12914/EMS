@@ -39,8 +39,14 @@ Route::group(['middleware' => 'auth.check'], function () {
         //staff
         Route::resource('employee', 'EmployeeController');
 
+        //excavator
+        Route::resource('excavator', 'ExcavatorController');
+
         //wage
         Route::resource('employee-wage', 'EmployeeWageController');
+
+        //wage
+        Route::resource('excavator-reading', 'ExcavatorReadingController');
 
         //expenses
         Route::resource('expense', 'ExpenseController');

@@ -16,7 +16,7 @@ class ExcavatorReadingRepository extends Repository
     }
 
     /**
-     * Return expenses.
+     * Return excavatorReadings.
      */
     public function getExcavatorReadings(
         $whereParams=[],
@@ -27,75 +27,75 @@ class ExcavatorReadingRepository extends Repository
         $withParams=[],
         $activeFlag=true
     ){
-        $expenses = [];
+        $excavatorReadings = [];
 
         try {
-            $expenses = empty($withParams) ? ExcavatorReading::query() : ExcavatorReading::with($withParams);
+            $excavatorReadings = empty($withParams) ? ExcavatorReading::query() : ExcavatorReading::with($withParams);
 
-            $expenses = $activeFlag ? $expenses->active() : $expenses;
+            $excavatorReadings = $activeFlag ? $excavatorReadings->active() : $excavatorReadings;
 
-            $expenses = parent::whereFilter($expenses, $whereParams);
+            $excavatorReadings = parent::whereFilter($excavatorReadings, $whereParams);
 
-            $expenses = parent::orWhereFilter($expenses, $orWhereParams);
+            $excavatorReadings = parent::orWhereFilter($excavatorReadings, $orWhereParams);
 
-            $expenses = parent::relationalFilter($expenses, $relationalParams);
+            $excavatorReadings = parent::relationalFilter($excavatorReadings, $relationalParams);
 
-            return (!empty($aggregates['key']) ? parent::aggregatesSwitch($expenses, $aggregates) : parent::getFilter($expenses, $orderBy));
+            return (!empty($aggregates['key']) ? parent::aggregatesSwitch($excavatorReadings, $aggregates) : parent::getFilter($excavatorReadings, $orderBy));
         } catch (Exception $e) {
             $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 1);
-
+dd($e);
             throw new AppCustomException("CustomError", $this->errorCode);
         }
 
-        return $expenses;
+        return $excavatorReadings;
     }
 
     /**
-     * return expense.
+     * return excavatorReading.
      */
     public function getExcavatorReading($id, $withParams=[], $activeFlag=true)
     {
-        $expense = [];
+        $excavatorReading = [];
 
         try {
             if(empty($withParams)) {
-                $expense = ExcavatorReading::query();
+                $excavatorReading = ExcavatorReading::query();
             } else {
-                $expense = ExcavatorReading::with($withParams);
+                $excavatorReading = ExcavatorReading::with($withParams);
             }
             
             if($activeFlag) {
-                $expense = $expense->active();
+                $excavatorReading = $excavatorReading->active();
             }
 
-            $expense = $expense->findOrFail($id);
+            $excavatorReading = $excavatorReading->findOrFail($id);
         } catch (Exception $e) {
             $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 2);
 
             throw new AppCustomException("CustomError", $this->errorCode);
         }
 
-        return $expense;
+        return $excavatorReading;
     }
 
     /**
-     * Action for expense save.
+     * Action for excavatorReading save.
      */
     public function saveExcavatorReading($inputArray=[], $id=null)
     {
         try {
             //find record with id or create new if none exist
-            $expense = ExcavatorReading::findOrNew($id);
+            $excavatorReading = ExcavatorReading::findOrNew($id);
 
             foreach ($inputArray as $key => $value) {
-                $expense->$key = $value;
+                $excavatorReading->$key = $value;
             }
-            //expense save
-            $expense->save();
+            //excavatorReading save
+            $excavatorReading->save();
 
             return [
                 'flag'    => true,
-                'expense' => $expense,
+                'excavatorReading' => $excavatorReading,
             ];
         } catch (Exception $e) {
             $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 3);
@@ -111,12 +111,12 @@ class ExcavatorReadingRepository extends Repository
     public function deleteExcavatorReading($id, $forceFlag=false)
     {
         try {
-            //get expense
-            $expense = $this->getExcavatorReading($id, [], false);
+            //get excavatorReading
+            $excavatorReading = $this->getExcavatorReading($id, [], false);
 
             //force delete or soft delete
             //related models will be deleted by deleting event handlers
-            $forceFlag ? $expense->forceDelete() : $expense->delete();
+            $forceFlag ? $excavatorReading->forceDelete() : $excavatorReading->delete();
             
             return [
                 'flag'  => true,

@@ -7,6 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 class Excavator extends Model
 {
     /**
+     * Scope a query to only include active employees.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('status', 1);
+    }
+    
+    /**
      * Get the user record who created the record.
      */
     public function creator()

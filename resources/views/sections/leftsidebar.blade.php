@@ -92,6 +92,27 @@
                             </li>
                         </ul>
                     </li>
+                    <li class="treeview {{ Request::is('excavator-reading/*') || Request::is('excavator-reading')? 'active' : '' }}">
+                        <a href="#">
+                            <i class="fa fa-user"></i>
+                            <span>Employee-Wage</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li class="{{ Request::is('excavator-reading/create')? 'active' : '' }}">
+                                <a href="{{route('excavator-reading.create') }}">
+                                    <i class="fa fa-circle-o text-yellow"></i> Register
+                                </a>
+                            </li>
+                            <li class="{{ Request::is('excavator-reading')? 'active' : '' }}">
+                                <a href="{{route('excavator-reading.index') }}">
+                                    <i class="fa fa-circle-o text-aqua"></i> List
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                     <li class="treeview {{ Request::is('expense/*') || Request::is('expense')? 'active' : '' }}">
                         <a href="#">
                             <i class="fa fa-wrench"></i>
@@ -171,6 +192,27 @@
                             </li>
                             <li class="{{ Request::is('employee')? 'active' : '' }}">
                                 <a href="{{route('employee.index') }}">
+                                    <i class="fa fa-circle-o text-aqua"></i> List
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="treeview {{ Request::is('excavator/*') || Request::is('excavator')? 'active' : '' }}">
+                        <a href="#">
+                            <i class="fa fa-gavel"></i>
+                            <span>Excavators</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li class="{{ Request::is('excavator/create')? 'active' : '' }}">
+                                <a href="{{route('excavator.create') }}">
+                                    <i class="fa fa-circle-o text-yellow"></i> Register
+                                </a>
+                            </li>
+                            <li class="{{ Request::is('excavator')? 'active' : '' }}">
+                                <a href="{{route('excavator.index') }}">
                                     <i class="fa fa-circle-o text-aqua"></i> List
                                 </a>
                             </li>

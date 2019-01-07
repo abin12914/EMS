@@ -38,7 +38,7 @@ class ExcavatorReadingController extends Controller
         $fromDate    = empty($request->get('from_date')) ?: Carbon::createFromFormat('d-m-Y', $request->get('from_date'))->format('Y-m-d');
         $toDate      = empty($request->get('to_date')) ?: Carbon::createFromFormat('d-m-Y', $request->get('to_date'))->format('Y-m-d');
 
-        $    = [
+        $whereParams = [
             'from_date' => [
                 'paramName'     => 'reading_date',
                 'paramOperator' => '>=',
@@ -79,9 +79,9 @@ class ExcavatorReadingController extends Controller
         $whereParams['to_date']['paramValue']   = $request->get('to_date');
         
         //getExcavatorReadings($whereParams=[],$orWhereParams=[],$relationalParams=[],$orderBy=['by' => 'id', 'order' => 'asc', 'num' => null], $withParams=[],$activeFlag=true)
-        return view('excavatorReadings.list', [
+        return view('excavator-readings.list', [
             'excavatorReadings' => $this->excavatorReadingRepo->getExcavatorReadings($whereParams, [], $relationalParams, ['by' => 'id', 'order' => 'asc', 'num' => $noOfRecordsPerPage], [], [], true),
-            'totalExcavatorReading' => $this->excavatorReadingRepo->getExcavatorReadings($whereParams, [], $relationalParams, [], ['key' => 'sum', 'value' => 'bill_amount'], [], true),
+            'totalExcavatorReading' => $this->excavatorReadingRepo->getExcavatorReadings($whereParams, [], $relationalParams, [], ['key' => 'sum', 'value' => 'breaker_hour'], [], true),
             'params'       => array_merge($whereParams, $relationalParams),
             'noOfRecords'  => $noOfRecordsPerPage,
         ]);
@@ -113,11 +113,11 @@ class ExcavatorReadingController extends Controller
 
         $excavatorRentAccountId = config('constants.accountConstants.ExcavatorReading.id');
         $transactionDate        = Carbon::createFromFormat('d-m-Y', $request->get('reading_date'))->format('Y-m-d');
-        $bucketRate             = $request->get('bucket_rate'));
-        $bucketHour             = $request->get('bucket_hour'));
-        $breakerRate            = $request->get('breaker_rate'));
-        $breakerHour            = $request->get('breaker_hour'));
-        $particulars            = '[Bucket : '. $bucketHour. 'x'. $bucketRate. '='. ($bucketHour * $bucketRate). ' + Breaker : '. $breakerHour. 'x'. $breakerRate. '='. ($breakerHour * $breakerRate). ']'
+        $bucketRate             = $request->get('bucket_rate');
+        $bucketHour             = $request->get('bucket_hour');
+        $breakerRate            = $request->get('breaker_rate');
+        $breakerHour            = $request->get('breaker_hour');
+        $particulars            = ('[Bucket : '. $bucketHour. 'x'. $bucketRate. '='. ($bucketHour * $bucketRate). ' + Breaker : '. $breakerHour. 'x'. $breakerRate. '='. ($breakerHour * $breakerRate). ']');
 
         //wrappin db transactions
         DB::beginTransaction();
@@ -132,7 +132,7 @@ class ExcavatorReadingController extends Controller
             $transactionResponse   = $transactionRepo->saveTransaction([
                 'debit_account_id'  => $excavatorRentAccountId, // debit the excavatorRent Account
                 'credit_account_id' => $request->get('customer_account_id'), // credit the supplier
-                'amount'            => $request->get('total_rent'),,
+                'amount'            => $request->get('total_rent'),
                 'transaction_date'  => $transactionDate,
                 'particulars'       => $request->get('description'). $particulars,
                 'status'            => 1,
@@ -146,7 +146,7 @@ class ExcavatorReadingController extends Controller
             //save to excavatorReading table
             $excavatorReadingResponse = $this->excavatorReadingRepo->saveExcavatorReading([
                 'reading_date'   => $transactionDate,
-                'excavator_id'   => $request->get('excavator__id'),,
+                'excavator_id'   => $request->get('excavator__id'),
                 'transaction_id' => $transactionResponse['transaction']->id,
                 'site_id'        => $request->get('site_id'),
                 'operator_id'    => $request->get('operator_id'),

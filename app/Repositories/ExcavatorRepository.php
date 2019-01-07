@@ -43,7 +43,7 @@ class ExcavatorRepository extends Repository
             return (!empty($aggregates['key']) ? parent::aggregatesSwitch($excavators, $aggregates): parent::getFilter($excavators, $orderBy));
         } catch (Exception $e) {
             $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 1);
-            
+
             throw new AppCustomException("CustomError", $this->errorCode);
         }
 
@@ -99,7 +99,7 @@ class ExcavatorRepository extends Repository
             ];
         } catch (Exception $e) {
             $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 3);
-
+dd($e);
             throw new AppCustomException("CustomError", $this->errorCode);
         }
         return [

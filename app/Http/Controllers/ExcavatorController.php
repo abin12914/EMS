@@ -68,13 +68,13 @@ class ExcavatorController extends Controller
             $user = Auth::user();
 
             //save excavator to table
-            $excavatorResponse   = $excavatorRepo->saveExcavator([
+            $excavatorResponse   = $this->excavatorRepo->saveExcavator([
                 'name'         => $request->get('name'),
                 'description'  => $request->get('description'),
-                'maker'        => $request->get('maker'),,
-                'capacity'     => $request->get('capacity'),,
+                'maker'        => $request->get('maker'),
+                'capacity'     => $request->get('capacity'),
                 'bucket_rate'  => $request->get('bucket_rate'),
-                'breaker_rate' => $request->get('breaker_rate'),,
+                'breaker_rate' => $request->get('breaker_rate'),
                 'status'       => 1,     
                 'created_by'   => $user->id,
                 'company_id'   => $user->company_id,
@@ -83,6 +83,8 @@ class ExcavatorController extends Controller
             if(!$excavatorResponse['flag']) {
                 throw new AppCustomException("CustomError", $excavatorResponse['errorCode']);
             }
+
+            DB::commit();
 
             if(!empty($id)) {
                 return [
@@ -170,7 +172,7 @@ class ExcavatorController extends Controller
         $updateResponse = $this->store($request, $id);
 
         if($updateResponse['flag']) {
-            return redirect(route('excavators.show', $updateResponse['excavator']->id))->with("message","Excavators details updated successfully. Updated Record Number : ". $updateResponse['excavator']->id)->with("alert-class", "success");
+            return redirect(route('excavator.index'))->with("message","Excavators details updated successfully. Updated Record Number : ". $updateResponse['excavator']->id)->with("alert-class", "success");
         }
         
         return redirect()->back()->with("message","Failed to update the excavator details. Error Code : ". $this->errorHead. "/". $updateResponse['errorCode'])->with("alert-class", "error");
