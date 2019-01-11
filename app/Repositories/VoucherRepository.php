@@ -53,44 +53,31 @@ dd($e);
     /**
      * Save voucher.
      */
-    public function saveVoucher($inputArray=[], $voucher=null)
+    public function saveVoucher($inputArray=[], $id=null)
     {
-        $saveFlag = false;
-
         try {
-            //transaction saving
-            if(empty($voucher)) {
-                $voucher = new Voucher;
+            //find record with id or create new if none exist
+            $voucher = Voucher::findOrNew($id);
+
+            foreach ($inputArray as $key => $value) {
+                $voucher->$key = $value;
             }
-            $voucher->transaction_id    = $inputArray['transaction_id'];
-            $voucher->date              = $inputArray['date'];
-            $voucher->voucher_type      = $inputArray['voucher_type'];
-            $voucher->amount            = $inputArray['amount'];
-            $voucher->status            = 1;
             //voucher save
             $voucher->save();
-            
-            $saveFlag = true;
-        } catch (Exception $e) {
-            if($e->getMessage() == "CustomError") {
-                $this->errorCode = $e->getCode();
-            } else {
-                $this->errorCode = $this->repositoryCode + 2;
-            }
 
+            return [
+                'flag'    => true,
+                'voucher' => $voucher,
+            ];
+        } catch (Exception $e) {
+            $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 2);
+dd($e);
             throw new AppCustomException("CustomError", $this->errorCode);
         }
 
-        if($saveFlag) {
-            return [
-                'flag'  => true,
-                'id'    => $voucher->id,
-            ];
-        }
-        
         return [
             'flag'      => false,
-            'errorCode' => $repositoryCode + 3,
+            'errorCode' => $this->repositoryCode + 3,
         ];
     }
 

@@ -136,7 +136,7 @@
                                             @foreach($vouchers as $index => $voucher)
                                                 <tr>
                                                     <td>{{ $index + $vouchers->firstItem() }}</td>
-                                                    <td>{{ $voucher->date->format('d-m-Y') }}</td>
+                                                    <td>{{ $voucher->transaction_date->format('d-m-Y') }}</td>
                                                     @if($voucher->voucher_type == 1)
                                                         <td>{{ $voucher->transaction->creditAccount->account_name }}</td>
                                                         <td>Receipt</td>

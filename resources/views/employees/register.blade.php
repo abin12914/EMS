@@ -67,6 +67,19 @@
                                         <h3 class="box-title" style="float: left;">Wage Details</h3>
                                     </div>
                                     <div class="form-group">
+                                        <label class="col-md-3 control-label"><b style="color: red;">* </b> Employee Type : </label>
+                                        <div class="col-md-9">
+                                            <select class="form-control select2" name="employee_type" id="employee_type" tabindex="4">
+                                                <option value="" {{ empty(old('employee_type')) ? 'selected' : '' }}>Select wage type</option>
+                                                <option value="1" {{ !empty(old('employee_type')) && old('employee_type') == 1 ? 'selected' : '' }}>Office Staff</option>
+                                                <option value="2" {{ !empty(old('employee_type')) && old('employee_type') == 2 ? 'selected' : '' }}>Machine Operator</option>
+                                            </select>
+                                            {{-- adding error_message p tag component --}}
+                                            @component('components.paragraph.error_message', ['fieldName' => 'employee_type'])
+                                            @endcomponent
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
                                         <label class="col-md-3 control-label"><b style="color: red;">* </b> Wage Type : </label>
                                         <div class="col-md-9">
                                             <select class="form-control select2" name="wage_type" id="wage_type" tabindex="4">

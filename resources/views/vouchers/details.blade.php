@@ -54,7 +54,7 @@
                                                 <i class="fa fa-calendar margin-r-5"></i> Date
                                             </strong>
                                             <p class="text-muted multi-line">
-                                                {{ $voucher->date->format('d-m-Y') }}
+                                                {{ $voucher->transaction_date->format('d-m-Y') }}
                                             </p>
                                             <hr>
                                         </div>

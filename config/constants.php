@@ -68,15 +68,15 @@ return [
             'status'            => 1,
         ],
 
-        'Sale' => [
+        'ExcavatorRent' => [
             'id'                => 2,
-            'account_name'      => 'Sales', //account id : 2
-            'description'       => 'Sales account',
+            'account_name'      => 'ExcavatorRent;', //account id : 2
+            'description'       => 'Excavator rent account',
             'type'              => 2, //nominal account
             'relation'          => 0, //nominal
             'financial_status'  => 0, //none
             'opening_balance'   => 0,
-            'name'              => 'Sales account',
+            'name'              => 'Excavator rent account',
             'phone'             => '0000000002',
             'status'            => 1,  
         ],

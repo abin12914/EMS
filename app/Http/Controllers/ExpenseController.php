@@ -99,7 +99,8 @@ class ExpenseController extends Controller
         AccountRepository $accountRepo,
         $id=null
     ) {
-        $errorCode          = 0;
+        $errorCode = 0;
+        $expense   = null;
 
         $expenseAccountId   = config('constants.accountConstants.ServiceAndExpense.id');
         $transactionDate    = Carbon::createFromFormat('d-m-Y', $request->get('date'))->format('Y-m-d');
@@ -112,7 +113,9 @@ class ExpenseController extends Controller
 
             //confirming expense account exist-ency.
             $expenseAccount = $accountRepo->getAccount($expenseAccountId, [], false);
-            $expense = $expenseRepo->getExpense($id, [], false);
+            if(!empty($id)) {
+                $expense = $this->expenseRepo->getExpense($id, [], false);
+            }
 
             //save expense transaction to table
             $transactionResponse   = $transactionRepo->saveTransaction([
@@ -133,7 +136,7 @@ class ExpenseController extends Controller
             $expenseResponse = $this->expenseRepo->saveExpense([
                 'transaction_id' => $transactionResponse['transaction']->id,
                 'expense_date'   => $transactionDate,
-                'excavator_id'   => $request->get('excavator__id'),
+                'excavator_id'   => $request->get('excavator_id'),
                 'service_id'     => $request->get('service_id'),
                 'bill_amount'    => $totalBill,
                 'status'         => 1,
@@ -144,6 +147,9 @@ class ExpenseController extends Controller
             if(!$expenseResponse['flag']) {
                 throw new AppCustomException("CustomError", $expenseResponse['errorCode']);
             }
+
+            DB::commit();
+
             if(!empty($id)) {
                 return [
                     'flag'    => true,
@@ -155,7 +161,7 @@ class ExpenseController extends Controller
         } catch (Exception $e) {
             //roll back in case of exceptions
             DB::rollback();
-
+dd($e);
             $errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : 1);
         }
         if(!empty($id)) {

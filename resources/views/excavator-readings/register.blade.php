@@ -36,52 +36,116 @@
                                         <div class="form-group">
                                             <div class="row">
                                                 <div class="col-md-6">
-                                                    <label for="employee_id" class="control-label"><b style="color: red;">* </b> Employee : </label>
-                                                    {{-- adding employee select component --}}
-                                                    @component('components.selects.employees', ['selectedEmployeeId' => old('employee_id'), 'selectName' => 'employee_id', 'tabindex' => 1])
+                                                    <label for="reading_date" class="control-label"><b style="color: red;">* </b> Date : </label>
+                                                    <input type="text" class="form-control decimal_number_only datepicker_reg" name="reading_date" id="reading_date" placeholder="Reading date" value="{{ old('reading_date') }}" tabindex="1">
+                                                    {{-- adding error_message p tag component --}}
+                                                    @component('components.paragraph.error_message', ['fieldName' => 'reading_date'])
+                                                    @endcomponent
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="excavator_id" class="control-label"><b style="color: red;">* </b> Excavator : </label>
+                                                    {{-- adding excavator select component --}}
+                                                    @component('components.selects.excavators', ['selectedExcavatorId' => old('excavator_id'), 'selectName' => 'excavator_id', 'tabindex' => 2])
+                                                    @endcomponent
+                                                    {{-- adding error_message p tag component --}}
+                                                    @component('components.paragraph.error_message', ['fieldName' => 'excavator_id'])
+                                                    @endcomponent
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <label for="customer_account_id" class="control-label"><b style="color: red;">* </b> Customer : </label>
+                                                    {{-- adding account select component --}}
+                                                    @component('components.selects.accounts', ['selectedAccountId' => old('customer_account_id'), 'cashAccountFlag' => true, 'selectName' => 'customer_account_id', 'activeFlag' => true, 'tabindex' => 3])
+                                                    @endcomponent
+                                                    {{-- adding error_message p tag component --}}
+                                                    @component('components.paragraph.error_message', ['fieldName' => 'customer_account_id'])
+                                                    @endcomponent
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="site_id" class="control-label"><b style="color: red;">* </b> Site : </label>
+                                                    {{-- adding excavator select component --}}
+                                                    @component('components.selects.sites', ['selectedSiteId' => old('site_id'), 'selectName' => 'site_id', 'tabindex' => 4])
+                                                    @endcomponent
+                                                    {{-- adding error_message p tag component --}}
+                                                    @component('components.paragraph.error_message', ['fieldName' => 'site_id'])
+                                                    @endcomponent
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <label for="employee_id" class="control-label"><b style="color: red;">* </b> Operator : </label>
+                                                    {{-- adding excavator select component --}}
+                                                    @component('components.selects.employees', ['selectedEmployeeId' => old('employee_id'), 'selectName' => 'employee_id', 'tabindex' => 5])
                                                     @endcomponent
                                                     {{-- adding error_message p tag component --}}
                                                     @component('components.paragraph.error_message', ['fieldName' => 'employee_id'])
                                                     @endcomponent
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <label for="from_date" class="control-label"><b style="color: red;">* </b> From Date : </label>
-                                                    <input type="text" class="form-control decimal_number_only datepicker_reg" name="from_date" id="from_date" placeholder="From date" value="{{ old('from_date') }}" tabindex="2">
-                                                    {{-- adding error_message p tag component --}}
-                                                    @component('components.paragraph.error_message', ['fieldName' => 'from_date'])
-                                                    @endcomponent
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <label for="to_date" class="control-label">To Date [Use only if generating wage for multiple days] : </label>
-                                                    <input type="text" class="form-control decimal_number_only datepicker_reg" name="to_date" id="to_date" placeholder="To date" value="{{ old('to_date') }}" tabindex="3">
-                                                    {{-- adding error_message p tag component --}}
-                                                    @component('components.paragraph.error_message', ['fieldName' => 'to_date'])
-                                                    @endcomponent
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label for="wage_amount" class="control-label"><b style="color: red;">* </b> Wage/Salary Amount: </label>
-                                                    <input type="text" class="form-control decimal_number_only" name="wage_amount" id="wage_amount" placeholder="Bill amount" value="{{ old('wage_amount') }}" maxlength="8" tabindex="4">
-                                                    {{-- adding error_message p tag component --}}
-                                                    @component('components.paragraph.error_message', ['fieldName' => 'wage_amount'])
-                                                    @endcomponent
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="row">
-                                                <div class="col-md-12">
-                                                    <label for="description" class="control-label"><b style="color: red;">* </b> Description: </label>
+                                                    <label for="description" class="control-label">Description: </label>
                                                     @if(!empty(old('description')))
-                                                        <textarea class="form-control" name="description" id="description" rows="2" placeholder="Description" style="resize: none;" tabindex="5">{{ old('description') }}</textarea>
+                                                        <textarea class="form-control" name="description" id="description" rows="1" placeholder="Description" style="resize: none;" tabindex="6">{{ old('description') }}</textarea>
                                                     @else
-                                                        <textarea class="form-control" name="description" id="description" rows="2" placeholder="Description" style="resize: none;" tabindex="5"></textarea>
+                                                        <textarea class="form-control" name="description" id="description" rows="1" placeholder="Description" style="resize: none;" tabindex="6"></textarea>
                                                     @endif
                                                     {{-- adding error_message p tag component --}}
                                                     @component('components.paragraph.error_message', ['fieldName' => 'description'])
+                                                    @endcomponent
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <label for="bucket_hour" class="control-label"><b style="color: red;">* </b> Hours Worked [Bucket] : </label>
+                                                            <input type="text" class="form-control decimal_number_only" name="bucket_hour" id="bucket_hour" placeholder="Hours Worked [Bucket]" value="{{ old('bucket_hour') }}" maxlength="7" tabindex="4">
+                                                            {{-- adding error_message p tag component --}}
+                                                            @component('components.paragraph.error_message', ['fieldName' => 'bucket_hour'])
+                                                            @endcomponent
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label for="bucket_rate" class="control-label"><b style="color: red;">* </b> Hourly Rate [Bucket] : </label>
+                                                            <input type="text" class="form-control decimal_number_only" name="bucket_rate" id="bucket_rate" placeholder="Hourly Rate [Bucket]" value="{{ old('bucket_rate') }}" maxlength="8" tabindex="4">
+                                                            {{-- adding error_message p tag component --}}
+                                                            @component('components.paragraph.error_message', ['fieldName' => 'bucket_rate'])
+                                                            @endcomponent
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <label for="breaker_hour" class="control-label"><b style="color: red;">* </b> Hours Worked [Breaker] : </label>
+                                                            <input type="text" class="form-control decimal_number_only" name="breaker_hour" id="breaker_hour" placeholder="Hours Worked [Breaker]" value="{{ old('breaker_hour') }}" maxlength="8" tabindex="4">
+                                                            {{-- adding error_message p tag component --}}
+                                                            @component('components.paragraph.error_message', ['fieldName' => 'breaker_hour'])
+                                                            @endcomponent
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label for="breaker_rate" class="control-label"><b style="color: red;">* </b> Hourly Rate [Breaker] : </label>
+                                                            <input type="text" class="form-control decimal_number_only" name="breaker_rate" id="breaker_rate" placeholder="Hourly Rate [Breaker]" value="{{ old('breaker_rate') }}" maxlength="8" tabindex="4">
+                                                            {{-- adding error_message p tag component --}}
+                                                            @component('components.paragraph.error_message', ['fieldName' => 'breaker_rate'])
+                                                            @endcomponent
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <label for="total_rent" class="control-label"><b style="color: red;">* </b> Total Rent : </label>
+                                                    <input type="text" class="form-control decimal_number_only" name="total_rent" id="total_rent" placeholder="Total Rent" value="{{ old('total_rent') }}" maxlength="8" tabindex="4">
+                                                    {{-- adding error_message p tag component --}}
+                                                    @component('components.paragraph.error_message', ['fieldName' => 'total_rent'])
                                                     @endcomponent
                                                 </div>
                                             </div>
@@ -110,7 +174,4 @@
     </section>
     <!-- /.content -->
 </div>
-@endsection
-@section('scripts')
-    <script src="/js/registrations/employeeWageRegistration.js?rndstr={{ rand(1000,9999) }}"></script>
 @endsection

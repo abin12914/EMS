@@ -2,23 +2,23 @@
 
 namespace App\Repositories;
 
-use App\Models\Expense;
+use App\Models\ExcavatorRent;
 use Exception;
 use App\Exceptions\AppCustomException;
 
-class ExpenseRepository extends Repository
+class ExcavatorRentRepository extends Repository
 {
     public $repositoryCode, $errorCode = 0;
 
     public function __construct()
     {
-        $this->repositoryCode = config('settings.repository_code.ExpenseRepository');
+        $this->repositoryCode = config('settings.repository_code.ExcavatorRentRepository');
     }
 
     /**
-     * Return expenses.
+     * Return excavatorRents.
      */
-    public function getExpenses(
+    public function getExcavatorRents(
         $whereParams=[],
         $orWhereParams=[],
         $relationalParams=[],
@@ -27,75 +27,75 @@ class ExpenseRepository extends Repository
         $withParams=[],
         $activeFlag=true
     ){
-        $expenses = [];
+        $excavatorRents = [];
 
         try {
-            $expenses = empty($withParams) ? Expense::query() : Expense::with($withParams);
+            $excavatorRents = empty($withParams) ? ExcavatorRent::query() : ExcavatorRent::with($withParams);
 
-            $expenses = $activeFlag ? $expenses->active() : $expenses;
+            $excavatorRents = $activeFlag ? $excavatorRents->active() : $excavatorRents;
 
-            $expenses = parent::whereFilter($expenses, $whereParams);
+            $excavatorRents = parent::whereFilter($excavatorRents, $whereParams);
 
-            $expenses = parent::orWhereFilter($expenses, $orWhereParams);
+            $excavatorRents = parent::orWhereFilter($excavatorRents, $orWhereParams);
 
-            $expenses = parent::relationalFilter($expenses, $relationalParams);
+            $excavatorRents = parent::relationalFilter($excavatorRents, $relationalParams);
 
-            return (!empty($aggregates['key']) ? parent::aggregatesSwitch($expenses, $aggregates) : parent::getFilter($expenses, $orderBy));
+            return (!empty($aggregates['key']) ? parent::aggregatesSwitch($excavatorRents, $aggregates) : parent::getFilter($excavatorRents, $orderBy));
         } catch (Exception $e) {
             $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 1);
-
-            throw new AppCustomException("CustomError", $this->errorCode);
-        }
-
-        return $expenses;
-    }
-
-    /**
-     * return expense.
-     */
-    public function getExpense($id, $withParams=[], $activeFlag=true)
-    {
-        $expense = [];
-
-        try {
-            if(empty($withParams)) {
-                $expense = Expense::query();
-            } else {
-                $expense = Expense::with($withParams);
-            }
-            
-            if($activeFlag) {
-                $expense = $expense->active();
-            }
-
-            $expense = $expense->findOrFail($id);
-        } catch (Exception $e) {
-            $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 2);
 dd($e);
             throw new AppCustomException("CustomError", $this->errorCode);
         }
 
-        return $expense;
+        return $excavatorRents;
     }
 
     /**
-     * Action for expense save.
+     * return excavatorRent.
      */
-    public function saveExpense($inputArray=[], $id=null)
+    public function getExcavatorRent($id, $withParams=[], $activeFlag=true)
+    {
+        $excavatorRent = [];
+
+        try {
+            if(empty($withParams)) {
+                $excavatorRent = ExcavatorRent::query();
+            } else {
+                $excavatorRent = ExcavatorRent::with($withParams);
+            }
+            
+            if($activeFlag) {
+                $excavatorRent = $excavatorRent->active();
+            }
+
+            $excavatorRent = $excavatorRent->findOrFail($id);
+        } catch (Exception $e) {
+            $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 2);
+
+            throw new AppCustomException("CustomError", $this->errorCode);
+        }
+
+        return $excavatorRent;
+    }
+
+    /**
+     * Action for excavatorRent save.
+     */
+    public function saveExcavatorRent($inputArray=[], $id=null)
     {
         try {
             //find record with id or create new if none exist
-            $expense = Expense::findOrNew($id);
+            $excavatorRent = ExcavatorRent::findOrNew($id);
 
             foreach ($inputArray as $key => $value) {
-                $expense->$key = $value;
+                $excavatorRent->$key = $value;
             }
-            //expense save
-            $expense->save();
+            //excavatorRent save
+            $excavatorRent->save();
 
             return [
                 'flag'    => true,
-                'expense' => $expense,
+                'excavatorRent' => $excavatorRent,
             ];
         } catch (Exception $e) {
             $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 3);
@@ -108,15 +108,15 @@ dd($e);
         ];
     }
 
-    public function deleteExpense($id, $forceFlag=false)
+    public function deleteExcavatorRent($id, $forceFlag=false)
     {
         try {
-            //get expense
-            $expense = $this->getExpense($id, [], false);
+            //get excavatorRent
+            $excavatorRent = $this->getExcavatorRent($id, [], false);
 
             //force delete or soft delete
             //related models will be deleted by deleting event handlers
-            $forceFlag ? $expense->forceDelete() : $expense->delete();
+            $forceFlag ? $excavatorRent->forceDelete() : $excavatorRent->delete();
             
             return [
                 'flag'  => true,

@@ -26,7 +26,7 @@ class VoucherRegistrationRequest extends FormRequest
     public function rules()
     {
         return [
-            'voucher_type'          =>  [
+            'transaction_type'          =>  [
                                             'required',
                                             Rule::in([1, 2]),
                                         ],

@@ -40,12 +40,12 @@ class VoucherController extends Controller
         
         $dateWhere = [
             'from_date' =>  [
-                'paramName'     => 'date',
+                'paramName'     => 'transaction_date',
                 'paramOperator' => '>=',
                 'paramValue'    => $fromDate,
             ],
             'to_date'   =>  [
-                'paramName'     => 'date',
+                'paramName'     => 'transaction_date',
                 'paramOperator' => '<=',
                 'paramValue'    => $toDate,
             ],
@@ -144,7 +144,7 @@ class VoucherController extends Controller
         $voucher            = null;
 
         $cashAccountId      = config('constants.accountConstants.Cash.id');
-        $transactionDate    = Carbon::createFromFormat('d-m-Y', $request->get('date'))->format('Y-m-d');
+        $transactionDate    = Carbon::createFromFormat('d-m-Y', $request->get('transaction_date'))->format('Y-m-d');
         $voucherType        = $request->get('transaction_type');
         $voucherTitle       = $voucherType == 1 ? "Reciept" : "Payemnt";
         $accountId          = $request->get('voucher_account_id');
@@ -192,7 +192,7 @@ class VoucherController extends Controller
 
             //save to voucher table
             $voucherResponse = $this->voucherRepo->saveVoucher([
-                'transaction_id'    => $transactionResponse['id'],
+                'transaction_id'    => $transactionResponse['transaction']->id,
                 'transaction_date'  => $transactionDate,
                 'transaction_type'  => $voucherType,
                 'amount'            => $amount,
@@ -209,14 +209,14 @@ class VoucherController extends Controller
             if(!empty($id)) {
                 return [
                     'flag'  => true,
-                    'id'    => $voucherResponse['id']
+                    'id'    => $voucherResponse['voucher']
                 ];
             }
-            return redirect(route('voucher.show', $voucherResponse['voucher']->id))->with("message", $voucherTitle. " details saved successfully. Reference Number : ". $transactionResponse['voucher']->id)->with("alert-class", "success");
+            return redirect(route('voucher.show', $voucherResponse['voucher']->id))->with("message", $voucherTitle. " details saved successfully. Reference Number : ". $transactionResponse['transaction']->id)->with("alert-class", "success");
         } catch (Exception $e) {
             //roll back in case of exceptions
             DB::rollback();
-
+dd($e);
             $errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : 1);
         }
         if(!empty($id)) {

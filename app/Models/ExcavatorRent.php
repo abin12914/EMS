@@ -4,9 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Events\DeletingExcavatorReadingEvent;
 
-class ExcavatorReading extends Model
+class ExcavatorRent extends Model
 {
     use SoftDeletes;
 
@@ -15,7 +14,7 @@ class ExcavatorReading extends Model
      *
      * @var array
      */
-    protected $dates = ['reading_date', 'deleted_at'];
+    protected $dates = ['from_date', 'to_date', 'deleted_at'];
 
     /**
      * The event map for the model.

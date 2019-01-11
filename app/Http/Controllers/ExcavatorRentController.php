@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Repositories\ExcavatorReadingRepository;
+use App\Repositories\ExcavatorRentRepository;
 use App\Repositories\TransactionRepository;
 use App\Repositories\AccountRepository;
-use App\Http\Requests\ExcavatorReadingRegistrationRequest;
-use App\Http\Requests\ExcavatorReadingFilterRequest;
+use App\Http\Requests\ExcavatorRentRegistrationRequest;
+use App\Http\Requests\ExcavatorRentFilterRequest;
 use Carbon\Carbon;
 use Auth;
 use DB;
@@ -15,15 +15,15 @@ use Exception;
 use App\Exceptions\AppCustomException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
-class ExcavatorReadingController extends Controller
+class ExcavatorRentController extends Controller
 {
-    protected $excavatorReadingRepo;
+    protected $excavatorRentRepo;
     public $errorHead = null;
 
-    public function __construct(ExcavatorReadingRepository $excavatorReadingRepo)
+    public function __construct(ExcavatorRentRepository $excavatorRentRepo)
     {
-        $this->excavatorReadingRepo = $excavatorReadingRepo;
-        $this->errorHead            = config('settings.controller_code.ExcavatorReadingController');
+        $this->excavatorRentRepo = $excavatorRentRepo;
+        $this->errorHead            = config('settings.controller_code.ExcavatorRentController');
     }
 
     /**
@@ -31,7 +31,7 @@ class ExcavatorReadingController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(ExcavatorReadingFilterRequest $request)
+    public function index(ExcavatorRentFilterRequest $request)
     {
         $noOfRecordsPerPage = $request->get('no_of_records') ?? config('settings.no_of_record_per_page');
         //date format conversion
@@ -40,12 +40,12 @@ class ExcavatorReadingController extends Controller
 
         $whereParams = [
             'from_date' => [
-                'paramName'     => 'reading_date',
+                'paramName'     => 'rent_date',
                 'paramOperator' => '>=',
                 'paramValue'    => $fromDate,
             ],
             'to_date' => [
-                'paramName'     => 'reading_date',
+                'paramName'     => 'rent_date',
                 'paramOperator' => '<=',
                 'paramValue'    => $toDate,
             ],
@@ -78,10 +78,10 @@ class ExcavatorReadingController extends Controller
         $whereParams['from_date']['paramValue'] = $request->get('from_date');
         $whereParams['to_date']['paramValue']   = $request->get('to_date');
         
-        //getExcavatorReadings($whereParams=[],$orWhereParams=[],$relationalParams=[],$orderBy=['by' => 'id', 'order' => 'asc', 'num' => null], $withParams=[],$activeFlag=true)
-        return view('excavator-readings.list', [
-            'excavatorReadings' => $this->excavatorReadingRepo->getExcavatorReadings($whereParams, [], $relationalParams, ['by' => 'id', 'order' => 'asc', 'num' => $noOfRecordsPerPage], [], [], true),
-            'totalExcavatorReading' => $this->excavatorReadingRepo->getExcavatorReadings($whereParams, [], $relationalParams, [], ['key' => 'sum', 'value' => 'breaker_hour'], [], true),
+        //getExcavatorRents($whereParams=[],$orWhereParams=[],$relationalParams=[],$orderBy=['by' => 'id', 'order' => 'asc', 'num' => null], $withParams=[],$activeFlag=true)
+        return view('excavator-rent.list', [
+            'excavatorRents' => $this->excavatorRentRepo->getExcavatorRents($whereParams, [], $relationalParams, ['by' => 'id', 'order' => 'asc', 'num' => $noOfRecordsPerPage], [], [], true),
+            'totalExcavatorRent' => $this->excavatorRentRepo->getExcavatorRents($whereParams, [], $relationalParams, [], ['key' => 'sum', 'value' => 'rent'], [], true),
             'params'       => array_merge($whereParams, $relationalParams),
             'noOfRecords'  => $noOfRecordsPerPage,
         ]);
@@ -94,7 +94,7 @@ class ExcavatorReadingController extends Controller
      */
     public function create()
     {
-        return view('excavator-readings.register');
+        return view('excavator-rent.register');
     }
 
     /**
@@ -104,21 +104,19 @@ class ExcavatorReadingController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(
-        ExcavatorReadingRegistrationRequest $request,
+        ExcavatorRentRegistrationRequest $request,
         TransactionRepository $transactionRepo,
         AccountRepository $accountRepo,
         $id=null
-    ) {
-        $errorCode        = 0;
-        $excavatorReading = null;
+    ) {dd('x');
+        $errorCode     = 0;
+        $excavatorRent = null;
 
         $excavatorRentAccountId = config('constants.accountConstants.ExcavatorRent.id');
-        $transactionDate        = Carbon::createFromFormat('d-m-Y', $request->get('reading_date'))->format('Y-m-d');
-        $bucketRate             = $request->get('bucket_rate');
-        $bucketHour             = $request->get('bucket_hour');
-        $breakerRate            = $request->get('breaker_rate');
-        $breakerHour            = $request->get('breaker_hour');
-        $particulars            = ('[Bucket : '. $bucketHour. 'x'. $bucketRate. '='. ($bucketHour * $bucketRate). ' + Breaker : '. $breakerHour. 'x'. $breakerRate. '='. ($breakerHour * $breakerRate). ']');
+        
+        $fromDate    = Carbon::createFromFormat('d-m-Y', $request->get('from_date'))->format('Y-m-d');
+        $toDate      = Carbon::createFromFormat('d-m-Y', $request->get('to_date'))->format('Y-m-d');
+        $particulars = ("Excavator rent generated.");
 
         //wrappin db transactions
         DB::beginTransaction();
@@ -128,44 +126,40 @@ class ExcavatorReadingController extends Controller
             //confirming excavatorRent account exist-ency.
             $excavatorRentAccount = $accountRepo->getAccount($excavatorRentAccountId, [], false);
             if(!empty($id)) {
-                $excavatorReading     = $this->excavatorReadingRepo->getExcavatorReading($id, [], false);
+                $excavatorRent = $this->excavatorRentRepo->getExcavatorRent($id, [], false);
             }
 
-            //save excavatorReading transaction to table
+            //save excavatorRent transaction to table
             $transactionResponse   = $transactionRepo->saveTransaction([
                 'debit_account_id'  => $excavatorRentAccountId, // debit the excavatorRent Account
                 'credit_account_id' => $request->get('customer_account_id'), // credit the supplier
                 'amount'            => $request->get('total_rent'),
-                'transaction_date'  => $transactionDate,
+                'transaction_date'  => $toDate,
                 'particulars'       => $request->get('description'). $particulars,
                 'status'            => 1,
                 'company_id'        => $user->company_id,
-            ], (!empty($excavatorReading) ? $excavatorReading->transaction_id : null));
+            ], (!empty($excavatorRent) ? $excavatorRent->transaction_id : null));
 
             if(!$transactionResponse['flag']) {
                 throw new AppCustomException("CustomError", $transactionResponse['errorCode']);
             }
 
-            //save to excavatorReading table
-            $excavatorReadingResponse = $this->excavatorReadingRepo->saveExcavatorReading([
-                'reading_date'   => $transactionDate,
+            //save to excavatorRent table
+            $excavatorRentResponse = $this->excavatorRentRepo->saveExcavatorRent([
                 'excavator_id'   => $request->get('excavator_id'),
                 'transaction_id' => $transactionResponse['transaction']->id,
                 'site_id'        => $request->get('site_id'),
-                'operator_id'    => $request->get('operator_id'),
+                'from_date'      => $fromDate,
+                'to_date'        => $toDate,
                 'description'    => $request->get('description'),
-                'bucket_hour'    => $request->get('bucket_hour'),
-                'bucket_rate'    => $request->get('bucket_rate'),
-                'breaker_hour'   => $request->get('breaker_hour'),
-                'breaker_rate'   => $request->get('breaker_rate'),
-                'total_rent'     => $request->get('total_rent'),
+                'rent'           => $request->get('total_rent'),
                 'status'         => 1,
                 'created_by'     => $user->id,
                 'company_id'     => $user->company_id,
             ], $id);
 
-            if(!$excavatorReadingResponse['flag']) {
-                throw new AppCustomException("CustomError", $excavatorReadingResponse['errorCode']);
+            if(!$excavatorRentResponse['flag']) {
+                throw new AppCustomException("CustomError", $excavatorRentResponse['errorCode']);
             }
 
             DB::commit();
@@ -173,11 +167,11 @@ class ExcavatorReadingController extends Controller
             if(!empty($id)) {
                 return [
                     'flag'             => true,
-                    'excavatorReading' => $excavatorReadingResponse['excavatorReading']
+                    'excavatorRent' => $excavatorRentResponse['excavatorRent']
                 ];
             }
 
-            return redirect(route('excavator-reading.index'))->with("message","ExcavatorReading details saved successfully. Reference Number : ". $excavatorReadingResponse['excavatorReading'])->with("alert-class", "success");
+            return redirect(route('excavator-rent.index'))->with("message","ExcavatorRent details saved successfully. Reference Number : ". $excavatorRentResponse['excavatorRent'])->with("alert-class", "success");
         } catch (Exception $e) {
             //roll back in case of exceptions
             DB::rollback();
@@ -190,7 +184,7 @@ dd($e);
                 'errorCode'    => $errorCode
             ];
         }
-        return redirect()->back()->with("message","Failed to save the excavatorReading details. Error Code : ". $this->errorHead. "/". $errorCode)->with("alert-class", "error");
+        return redirect()->back()->with("message","Failed to save the excavatorRent details. Error Code : ". $this->errorHead. "/". $errorCode)->with("alert-class", "error");
     }
 
     /**
@@ -202,19 +196,19 @@ dd($e);
     public function show($id)
     {
         $errorCode  = 0;
-        $excavatorReading    = [];
+        $excavatorRent    = [];
 
         try {
-            $excavatorReading = $this->excavatorReadingRepo->getExcavatorReading($id, [], false);
+            $excavatorRent = $this->excavatorRentRepo->getExcavatorRent($id, [], false);
         } catch (\Exception $e) {
             $errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : 2);
             
             //throwing methodnotfound exception when no model is fetched
-            throw new ModelNotFoundException("ExcavatorReading", $errorCode);
+            throw new ModelNotFoundException("ExcavatorRent", $errorCode);
         }
 
-        return view('excavator-readings.details', [
-            'excavatorReading' => $excavatorReading,
+        return view('excavator-rent.details', [
+            'excavatorRent' => $excavatorRent,
         ]);
     }
 
@@ -227,18 +221,18 @@ dd($e);
     public function edit($id)
     {
         $errorCode  = 0;
-        $excavatorReading    = [];
+        $excavatorRent    = [];
 
         try {
-            $excavatorReading = $this->excavatorReadingRepo->getExcavatorReading($id, [], false);
+            $excavatorRent = $this->excavatorRentRepo->getExcavatorRent($id, [], false);
         } catch (\Exception $e) {
             $errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : 3);
             //throwing methodnotfound exception when no model is fetched
-            throw new ModelNotFoundException("ExcavatorReading", $errorCode);
+            throw new ModelNotFoundException("ExcavatorRent", $errorCode);
         }
 
-        return view('excavator-readings.edit', [
-            'excavatorReading' => $excavatorReading,
+        return view('excavator-rent.edit', [
+            'excavatorRent' => $excavatorRent,
         ]);
     }
 
@@ -250,7 +244,7 @@ dd($e);
      * @return \Illuminate\Http\Response
      */
     public function update(
-        ExcavatorReadingRegistrationRequest $request,
+        ExcavatorRentRegistrationRequest $request,
         TransactionRepository $transactionRepo,
         AccountRepository $accountRepo,
         $id
@@ -258,10 +252,10 @@ dd($e);
         $updateResponse = $this->store($request, $transactionRepo, $accountRepo, $id);
 
         if($updateResponse['flag']) {
-            return redirect(route('excavatorReadings.show', $updateResponse['excavatorReadings']->id))->with("message","ExcavatorReadings details updated successfully. Updated Record Number : ". $updateResponse['excavatorReadings']->id)->with("alert-class", "success");
+            return redirect(route('excavatorRents.show', $updateResponse['excavatorRents']->id))->with("message","ExcavatorRents details updated successfully. Updated Record Number : ". $updateResponse['excavatorRents']->id)->with("alert-class", "success");
         }
         
-        return redirect()->back()->with("message","Failed to update the excavatorReadings details. Error Code : ". $this->errorHead. "/". $updateResponse['errorCode'])->with("alert-class", "error");
+        return redirect()->back()->with("message","Failed to update the excavatorRents details. Error Code : ". $this->errorHead. "/". $updateResponse['errorCode'])->with("alert-class", "error");
     }
 
     /**
@@ -277,14 +271,14 @@ dd($e);
         //wrapping db transactions
         DB::beginTransaction();
         try {
-            $deleteResponse = $this->excavatorReadingRepo->deleteExcavatorReading($id, false);
+            $deleteResponse = $this->excavatorRentRepo->deleteExcavatorRent($id, false);
             
             if(!$deleteResponse['flag']) {
                 throw new AppCustomException("CustomError", $deleteResponse['errorCode']);
             }
             
             DB::commit();
-            return redirect(route('excavatorReading.index'))->with("message","ExcavatorReading details deleted successfully.")->with("alert-class", "success");
+            return redirect(route('excavatorRent.index'))->with("message","ExcavatorRent details deleted successfully.")->with("alert-class", "success");
         } catch (Exception $e) {
             //roll back in case of exceptions
             DB::rollback();
@@ -292,6 +286,6 @@ dd($e);
             $errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : 4);
         }
         
-        return redirect()->back()->with("message","Failed to delete the excavatorReading details. Error Code : ". $this->errorHead. "/". $errorCode)->with("alert-class", "error");
+        return redirect()->back()->with("message","Failed to delete the excavatorRent details. Error Code : ". $this->errorHead. "/". $errorCode)->with("alert-class", "error");
     }
 }

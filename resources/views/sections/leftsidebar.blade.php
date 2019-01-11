@@ -95,7 +95,7 @@
                     <li class="treeview {{ Request::is('excavator-reading/*') || Request::is('excavator-reading')? 'active' : '' }}">
                         <a href="#">
                             <i class="fa fa-user"></i>
-                            <span>Employee-Wage</span>
+                            <span>Excavator Reading</span>
                             <span class="pull-right-container">
                                 <i class="fa fa-angle-left pull-right"></i>
                             </span>
@@ -108,6 +108,27 @@
                             </li>
                             <li class="{{ Request::is('excavator-reading')? 'active' : '' }}">
                                 <a href="{{route('excavator-reading.index') }}">
+                                    <i class="fa fa-circle-o text-aqua"></i> List
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="treeview {{ Request::is('excavator-reading/*') || Request::is('excavator-reading')? 'active' : '' }}">
+                        <a href="#">
+                            <i class="fa fa-user"></i>
+                            <span>Excavator Rent</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li class="{{ Request::is('excavator-rent/create')? 'active' : '' }}">
+                                <a href="{{route('excavator-rent.create') }}">
+                                    <i class="fa fa-circle-o text-yellow"></i> Register
+                                </a>
+                            </li>
+                            <li class="{{ Request::is('excavator-rent')? 'active' : '' }}">
+                                <a href="{{route('excavator-rent.index') }}">
                                     <i class="fa fa-circle-o text-aqua"></i> List
                                 </a>
                             </li>
