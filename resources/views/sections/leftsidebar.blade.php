@@ -26,29 +26,6 @@
                         <i class="fa fa-dashboard"></i> <span>Dashboard</span>
                     </a>
                 </li>
-                {{-- @if($loggedUser->isSuperAdmin())
-                    <li class="treeview {{ (Request::is('company/*') || Request::is('company'))? 'active' : '' }}">
-                        <a href="#">
-                            <i class="fa fa-industry"></i>
-                            <span>Company</span>
-                            <span class="pull-right-container">
-                                <i class="fa fa-angle-left pull-right"></i>
-                            </span>
-                        </a>
-                        <ul class="treeview-menu">
-                            <li class="{{ Request::is('company/create')? 'active' : '' }}">
-                                <a href="{{ route('company.create') }}">
-                                    <i class="fa fa-circle-o text-yellow"></i> Register
-                                </a>
-                            </li>
-                            <li class="{{ Request::is('company')? 'active' : '' }}">
-                                <a href="{{ route('company.index') }}">
-                                    <i class="fa fa-circle-o text-aqua"></i> List
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                @endif --}}
                 @if($loggedUser->isSuperAdmin() || $loggedUser->isAdmin() || $loggedUser->isUser())
                     <li class="treeview {{ Request::is('reports/*')? 'active' : '' }}">
                         <a href="#">

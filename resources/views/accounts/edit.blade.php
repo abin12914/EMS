@@ -28,9 +28,9 @@
                             </div>
                             <!-- /.box-header -->
                             <!-- form start -->
-                            <form action="{{route('account.update', $account->id)}}" method="post" class="form-horizontal" enctype="multipart/form-data" autocomplete="off">
-                                <input type="hidden" name="_token" value="{{csrf_token()}}">
-                                {{ method_field('PUT') }}
+                            <form action="{{route('account.update', ['id' => $account->id])}}" method="post" class="form-horizontal" enctype="multipart/form-data" autocomplete="off">
+                                @csrf()
+                                @method('PUT')
                                 <div class="box-body">
                                     <div class="row">
                                         <div class="col-md-11">
@@ -71,7 +71,7 @@
                                             <div class="form-group">
                                                 <label for="phone" class="col-md-3 control-label"><b style="color: red;">* </b> Phone : </label>
                                                 <div class="col-md-9">
-                                                    <input type="text" name="phone" class="form-control number_only" id="phone" placeholder="Phone number" value="{{ old('phone', $account->phone) }}" tabindex="4" maxlength="13">
+                                                    <input type="text" name="phone" class="form-control number_only" id="phone" placeholder="Phone number" value="{{ old('phone', $account->phone) }}" tabindex="4" maxlength="13" minlength="10">
                                                     {{-- adding error_message p tag component --}}
                                                     @component('components.paragraph.error_message', ['fieldName' => 'phone'])
                                                     @endcomponent

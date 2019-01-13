@@ -8,7 +8,7 @@ use App\Exceptions\AppCustomException;
 
 class EmployeeRepository extends Repository
 {
-    public $repositoryCode, $errorCode = 0, $loop = 0;
+    public $repositoryCode, $errorCode = 0;
 
     public function __construct()
     {

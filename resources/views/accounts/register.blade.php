@@ -28,8 +28,8 @@
                         <!-- /.box-header -->
                         <!-- form start -->
                         <form action="{{route('account.store')}}" method="post" class="form-horizontal" enctype="multipart/form-data" autocomplete="off">
+                            @csrf()
                             <div class="box-body">
-                                <input type="hidden" name="_token" value="{{csrf_token()}}">
                                 <div class="row">
                                     <div class="col-md-11">
                                         <div class="form-group">

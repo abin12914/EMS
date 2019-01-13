@@ -86,7 +86,7 @@
                     {{-- page header for printers --}}
                     @include('sections.print-head')
                     <div class="box-header no-print">
-                        @if(!empty($params['wage_type']) || !empty($params['employee_id']))
+                        @if(!empty($params['wage_type']['paramValue']) || !empty($params['employee_id']['paramValue']))
                             <b>Filters applied!</b>
                         @endif
                     </div>
@@ -97,8 +97,8 @@
                                     <thead>
                                         <tr>
                                             <th style="width: 5%;">#</th>
-                                            <th style="width: 25%;">Employee Name</th>
-                                            <th style="width: 15%;">Wage Type</th>
+                                            <th style="width: 20%;">Employee Name</th>
+                                            <th style="width: 20%;">Employee Type</th>
                                             <th style="width: 15%;">Wage</th>
                                             <th style="width: 25%;">Account Name</th>
                                             <th style="width: 15%;" class="no-print">Details</th>
@@ -110,14 +110,8 @@
                                                 <tr>
                                                     <td>{{ $index + $employees->firstItem() }}</td>
                                                     <td>{{ $employee->account->name }}</td>
-                                                    @if(!empty($wageTypes))
-                                                        <td>
-                                                            {{ !empty($wageTypes[$employee->wage_type]) ? $wageTypes[$employee->wage_type] : "Error!" }}
-                                                        </td>
-                                                    @else
-                                                        <td>Error</td>
-                                                    @endif
-                                                    <td>{{ $employee->wage }}</td>
+                                                    <td>{{ $employee->employee_type == 1 ? "Office Staff" : "Machine Operator" }}</td>
+                                                    <td>{{ $employee->wage }} / {{ !empty($wageTypes[$employee->wage_type]) ? $wageTypes[$employee->wage_type] : "Error!" }}</td>
                                                     <td>{{ $employee->account->account_name }}</td>
                                                     <td class="no-print">
                                                         <a href="{{ route('employee.show', ['id' => $employee->id]) }}">

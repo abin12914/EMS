@@ -25,13 +25,13 @@ class EmployeeFilterRequest extends FormRequest
     public function rules()
     {
         return [
-            'employee_id'   =>  [
-                                    'nullable',
-                                    'exists:employees,id',
-                                ],
             'wage_type'     =>  [
                                     'nullable',
                                     Rule::in(array_keys(config('constants.employeeWageTypes'))),
+                                ],
+            'employee_id'   =>  [
+                                    'nullable',
+                                    'exists:employees,id',
                                 ],
             'page'          =>  [
                                     'nullable',

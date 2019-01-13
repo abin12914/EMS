@@ -99,7 +99,7 @@
                                             <th style="width: 5%;">#</th>
                                             <th style="width: 20%;">Account Name</th>
                                             <th style="width: 15%;">Relation</th>
-                                            <th style="width: 20%;">Account Holder</th>
+                                            <th style="width: 20%;">Name</th>
                                             <th style="width: 15%;">Phone</th>
                                             <th style="width: 10%;">Opening Credit</th>
                                             <th style="width: 10%;">Opening Debit</th>

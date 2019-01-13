@@ -22,8 +22,8 @@ class EmployeeController extends Controller
 
     public function __construct(EmployeeRepository $employeeRepo)
     {
-        $this->employeeRepo         = $employeeRepo;
-        $this->errorHead            = config('settings.controller_code.EmployeeController');
+        $this->employeeRepo = $employeeRepo;
+        $this->errorHead    = config('settings.controllerCode.EmployeeController');
     }
 
     /**
@@ -243,7 +243,7 @@ class EmployeeController extends Controller
 
         try {
             $employee = $this->employeeRepo->getEmployee($id);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : 3);
             //throwing methodnotfound exception when no model is fetched
             throw new ModelNotFoundException("Employee", $errorCode);

@@ -26,7 +26,7 @@
                             <!-- Add the bg color to the header using any of the bg-* classes -->
                             <div class="widget-user-header bg-yellow">
                                 <div class="widget-user-image">
-                                    <img class="img-circle" src="{{ $employee->account->image ?: "/images/accounts/default_account.png" }}" alt="User Avatar">
+                                    <img class="img-circle" src="/images/accounts/default_account.png" alt="Employee Avatar">
                                 </div>
                                 <!-- /.widget-user-image -->
                                 <h3 class="widget-user-username">{{ $employee->account->name }}</h3>
@@ -57,39 +57,19 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <strong>
-                                                <i class="fa fa-phone margin-r-5"></i> Phone
+                                                <i class="fa fa-phone margin-r-5"></i> Address & Phone
                                             </strong>
                                             <p class="text-muted multi-line">
-                                                {{ $employee->account->phone }}
+                                                {{ (!empty($employee->account->address) ? ($employee->account->address. " - ") : ""). $employee->account->phone }}
                                             </p>
                                             <hr>
                                         </div>
                                         <div class="col-md-6">
                                             <strong>
-                                                <i class="fa fa-map-marker margin-r-5"></i> Address
+                                                <i class="fa fa-inr margin-r-5"></i> Wage
                                             </strong>
                                             <p class="text-muted multi-line">
-                                                {{ $employee->account->address ?? "-" }}
-                                            </p>
-                                            <hr>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <strong>
-                                                <i class="fa fa-tags margin-r-5"></i> Wage Type
-                                            </strong>
-                                            <p class="text-muted multi-line">
-                                                {{ !empty($wageTypes) && !empty($wageTypes[$employee->wage_type]) ? $wageTypes[$employee->wage_type] : 'error'}}
-                                            </p>
-                                            <hr>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <strong>
-                                                <i class="fa fa-inr margin-r-5"></i> Wage Amount
-                                            </strong>
-                                            <p class="text-muted multi-line">
-                                                {{ $employee->wage }}
+                                                {{ $employee->wage ." - ". (!empty($wageTypes) && !empty($wageTypes[$employee->wage_type]) ? $wageTypes[$employee->wage_type] : 'error')}}
                                             </p>
                                             <hr>
                                         </div>

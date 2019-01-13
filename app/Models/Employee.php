@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Events\DeletingEmployeeEvent;
 
 class Employee extends Model
 {
@@ -58,5 +57,13 @@ class Employee extends Model
     public function account()
     {
         return $this->belongsTo('App\Models\Account');
+    }
+
+    /**
+     * Get the employee wages for the employee.
+     */
+    public function employeeWages()
+    {
+        return $this->hasMany('App\Models\EmployeeWage');
     }
 }

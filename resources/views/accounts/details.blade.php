@@ -59,19 +59,19 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <strong>
-                                                <i class="fa fa-file-text-o margin-r-5"></i> Description
+                                                <i class="fa fa-user-o margin-r-5"></i> Name
                                             </strong>
                                             <p class="text-muted multi-line">
-                                                {{ $account->description ?? "-" }}
+                                                {{ $account->name }}
                                             </p>
                                             <hr>
                                         </div>
                                         <div class="col-md-6">
                                             <strong>
-                                                <i class="fa fa-user-o margin-r-5"></i> Name
+                                                <i class="fa fa-file-text-o margin-r-5"></i> Description
                                             </strong>
                                             <p class="text-muted multi-line">
-                                                {{ $account->name }}
+                                                {{ $account->description ?? "-" }}
                                             </p>
                                             <hr>
                                         </div>

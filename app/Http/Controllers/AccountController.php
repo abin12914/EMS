@@ -21,8 +21,8 @@ class AccountController extends Controller
 
     public function __construct(AccountRepository $accountRepo)
     {
-        $this->accountRepo          = $accountRepo;
-        $this->errorHead            = config('settings.controller_code.AccountController');
+        $this->accountRepo = $accountRepo;
+        $this->errorHead   = config('settings.controllerCode.AccountController');
     }
 
     /**
@@ -215,7 +215,7 @@ class AccountController extends Controller
 
         try {
             $account = $this->accountRepo->getAccount($id, [], false);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : 2);
 
             //throwing model not found exception when no model is fetched
@@ -247,7 +247,7 @@ class AccountController extends Controller
 
         try {
             $account = $this->accountRepo->getAccount($id, [], false);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : 3);
             //throwing methodnotfound exception when no model is fetched
             throw new ModelNotFoundException("Account", $errorCode);
