@@ -40,4 +40,28 @@ class Excavator extends Model
     {
         return $this->belongsTo('App\Models\User');
     }
+
+    /**
+     * Get the excavator reading records associated with the excavator.
+     */
+    public function excavatorReadings()
+    {
+        return $this->hasMany('App\Models\ExcavatorReading', 'excavator_id');
+    }
+
+    /**
+     * Get the excavator rent records associated with the excavator.
+     */
+    public function excavatorRents()
+    {
+        return $this->hasMany('App\Models\ExcavatorRent', 'excavator_id');
+    }
+
+    /**
+     * Get the excavator expense records associated with the excavator.
+     */
+    public function expenses()
+    {
+        return $this->hasMany('App\Models\Expense', 'excavator_id');
+    }
 }

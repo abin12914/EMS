@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ExcavatorRegistrationRequest extends FormRequest
 {
@@ -24,7 +25,40 @@ class ExcavatorRegistrationRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'name'          =>  [
+                                    'required',
+                                    'string',
+                                    'max:100',
+                                    'min:3',
+                                    Rule::unique('excavators')->ignore($this->excavator),
+                                ],
+            'description'   =>  [
+                                    'nullable',
+                                    'max:200',
+                                ],
+            'maker'         =>  [
+                                    'required',
+                                    'max:100',
+                                    'min:2',
+                                ],
+            'capacity'      =>  [
+                                    'required',
+                                    'numeric',
+                                    'min:1',
+                                    'max:9999',
+                                ],
+            'bucket_rate'   =>  [
+                                    'required',
+                                    'numeric',
+                                    'min:0',
+                                    'max:9999',
+                                ],
+            'breaker_rate'  =>  [
+                                    'required',
+                                    'numeric',
+                                    'min:0',
+                                    'max:9999',
+                                ]
         ];
     }
 }

@@ -29,7 +29,7 @@ class AccountRegistrationRequest extends FormRequest
                                             'required',
                                             'max:100',
                                             'min:3',
-                                            Rule::unique('accounts')->ignore($this->id),
+                                            Rule::unique('accounts')->ignore($this->account),
                                         ],
             'description'           =>  [
                                             'nullable',
@@ -54,7 +54,7 @@ class AccountRegistrationRequest extends FormRequest
                                             'required',
                                             'numeric',
                                             'digits_between:10,13',
-                                            Rule::unique('accounts', 'phone')->ignore($this->id),
+                                            Rule::unique('accounts', 'phone')->ignore($this->account),
                                         ],
             'address'               =>  [
                                             'nullable',

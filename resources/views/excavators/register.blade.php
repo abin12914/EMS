@@ -43,7 +43,7 @@
                                                     @endcomponent
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <label for="description" class="control-label"><b style="color: red;">* </b> Description: </label>
+                                                    <label for="description" class="control-label"> Description: </label>
                                                     @if(!empty(old('description')))
                                                         <textarea class="form-control" name="description" id="description" rows="1" placeholder="Description" style="resize: none;" tabindex="2">{{ old('description') }}</textarea>
                                                     @else
@@ -59,14 +59,14 @@
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <label for="maker" class="control-label"><b style="color: red;">* </b> Maker: </label>
-                                                    <input type="text" class="form-control" name="maker" id="maker" placeholder="Maker" value="{{ old('maker') }}" maxlength="100" tabindex="3">
+                                                    <input type="text" class="form-control" name="maker" id="maker" placeholder="Maker" value="{{ old('maker') }}" maxlength="100" minlength="3" tabindex="3">
                                                     {{-- adding error_message p tag component --}}
                                                     @component('components.paragraph.error_message', ['fieldName' => 'maker'])
                                                     @endcomponent
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label for="capacity" class="control-label"><b style="color: red;">* </b> Capacity: </label>
-                                                    <input type="text" class="form-control decimal_number_only" name="capacity" id="capacity" placeholder="Capacity" value="{{ old('capacity') }}" maxlength="100" tabindex="4">
+                                                    <input type="text" class="form-control decimal_number_only" name="capacity" id="capacity" placeholder="Capacity" value="{{ old('capacity') }}" maxlength="4" minlength="1" tabindex="4">
                                                     {{-- adding error_message p tag component --}}
                                                     @component('components.paragraph.error_message', ['fieldName' => 'capacity'])
                                                     @endcomponent
@@ -77,14 +77,14 @@
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <label for="bucket_rate" class="control-label"><b style="color: red;">* </b> Bucket Rate: </label>
-                                                    <input type="text" class="form-control decimal_number_only" name="bucket_rate" id="bucket_rate" placeholder="Bucket Rate" value="{{ old('bucket_rate') }}" maxlength="100" tabindex="5">
+                                                    <input type="text" class="form-control decimal_number_only" name="bucket_rate" id="bucket_rate" placeholder="Bucket Rate" value="{{ old('bucket_rate') }}" maxlength="4" minlength="1" tabindex="5">
                                                     {{-- adding error_message p tag component --}}
                                                     @component('components.paragraph.error_message', ['fieldName' => 'bucket_rate'])
                                                     @endcomponent
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label for="breaker_rate" class="control-label"><b style="color: red;">* </b> Breaker Rate: </label>
-                                                    <input type="text" class="form-control decimal_number_only" name="breaker_rate" id="breaker_rate" placeholder="Breaker Rate" value="{{ old('breaker_rate') }}" maxlength="100" tabindex="6">
+                                                    <input type="text" class="form-control decimal_number_only" name="breaker_rate" id="breaker_rate" placeholder="Breaker Rate" value="{{ old('breaker_rate') }}" maxlength="4" minlength="1" tabindex="6">
                                                     {{-- adding error_message p tag component --}}
                                                     @component('components.paragraph.error_message', ['fieldName' => 'breaker_rate'])
                                                     @endcomponent
@@ -116,7 +116,4 @@
     </section>
     <!-- /.content -->
 </div>
-@endsection
-@section('scripts')
-    <script src="/js/registrations/excavatorRegistration.js?rndstr={{ rand(1000,9999) }}"></script>
 @endsection

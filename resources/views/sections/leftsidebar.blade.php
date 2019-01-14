@@ -23,7 +23,7 @@
                 <li class="header">MAIN NAVIGATION</li>
                 <li class="{{ Request::is('dashboard')? 'active' : '' }}">
                     <a href="{{ route('dashboard') }}">
-                        <i class="fa fa-dashboard"></i> <span>Dashboard</span>
+                        <i class="fa fa-pie-chart"></i> <span>Dashboard</span>
                     </a>
                 </li>
                 @if($loggedUser->isSuperAdmin() || $loggedUser->isAdmin() || $loggedUser->isUser())
@@ -41,16 +41,11 @@
                                     <i class="fa fa-circle-o text-green"></i> Account Statement
                                 </a>
                             </li>
-                            {{-- <li class="{{ Request::is('reports/credir-list')? 'active' : '' }}">
-                                <a href="{{ route('report.credit.list') }}">
-                                    <i class="fa fa-circle-o text-green"></i> Credit List
-                                </a>
-                            </li> --}}
                         </ul>
                     </li>
                     <li class="treeview {{ Request::is('employee-wage/*') || Request::is('employee-wage')? 'active' : '' }}">
                         <a href="#">
-                            <i class="fa fa-user"></i>
+                            <i class="fa fa-user-secret"></i>
                             <span>Employee-Wage</span>
                             <span class="pull-right-container">
                                 <i class="fa fa-angle-left pull-right"></i>
@@ -71,7 +66,7 @@
                     </li>
                     <li class="treeview {{ Request::is('excavator-reading/*') || Request::is('excavator-reading')? 'active' : '' }}">
                         <a href="#">
-                            <i class="fa fa-user"></i>
+                            <i class="fa fa-tachometer"></i>
                             <span>Excavator Reading</span>
                             <span class="pull-right-container">
                                 <i class="fa fa-angle-left pull-right"></i>

@@ -28,7 +28,7 @@
                             </div>
                             <!-- /.box-header -->
                             <!-- form start -->
-                            <form action="{{ route('employee.update', ['id' => $employee->id]) }}" method="post" class="form-horizontal" enctype="multipart/form-data" autocomplete="off">
+                            <form action="{{ route('employee.update', $employee->id) }}" method="post" class="form-horizontal" enctype="multipart/form-data" autocomplete="off">
                                 @csrf()
                                 @method('PUT')
                                 <div class="box-body">
