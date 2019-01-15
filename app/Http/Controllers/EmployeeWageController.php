@@ -36,8 +36,8 @@ class EmployeeWageController extends Controller
     {
         $noOfRecordsPerPage = $request->get('no_of_records') ?? config('settings.no_of_record_per_page');
         //date format conversion
-        $fromDate    = empty($request->get('from_date')) ?: Carbon::createFromFormat('d-m-Y', $request->get('from_date'))->format('Y-m-d');
-        $toDate      = empty($request->get('to_date')) ?: Carbon::createFromFormat('d-m-Y', $request->get('to_date'))->format('Y-m-d');
+        $fromDate    = !empty($request->get('from_date')) ? Carbon::createFromFormat('d-m-Y', $request->get('from_date'))->format('Y-m-d') : null;
+        $toDate      = !empty($request->get('to_date')) ? Carbon::createFromFormat('d-m-Y', $request->get('to_date'))->format('Y-m-d') : null;
 
         $whereParams = [
             'from_date' => [
@@ -57,14 +57,17 @@ class EmployeeWageController extends Controller
             ],
         ];
 
+        $employeeWages = $this->employeeWageRepo->getEmployeeWages($whereParams, [], [], ['by' => 'id', 'order' => 'asc', 'num' => $noOfRecordsPerPage], [], ['transaction', 'employee.account'], true);
+        $totalEmployeeWage = $this->employeeWageRepo->getEmployeeWages($whereParams, [], [], [], ['key' => 'sum', 'value' => 'wage'], [], true);
+
         //params passing for auto selection
         $whereParams['from_date']['paramValue'] = $request->get('from_date');
         $whereParams['to_date']['paramValue']   = $request->get('to_date');
         
-        //getEmployeeWages($whereParams=[],$orWhereParams=[],$relationalParams=[],$orderBy=['by' => 'id', 'order' => 'asc', 'num' => null], $withParams=[],$activeFlag=true)
+        //getEmployeeWages($whereParams=[],$orWhereParams=[],$relationalParams=[],$orderBy=['by' => 'id', 'order' => 'asc', 'num' => null], $aggregates=['key' => null, 'value' => null], $withParams=[],$activeFlag=true)
         return view('employee-wages.list', [
-            'employeeWages'     => $this->employeeWageRepo->getEmployeeWages($whereParams, [], [], ['by' => 'id', 'order' => 'asc', 'num' => $noOfRecordsPerPage], [], [], true),
-            'totalEmployeeWage' => $this->employeeWageRepo->getEmployeeWages($whereParams, [], [], [], ['key' => 'sum', 'value' => 'wage'], [], true),
+            'employeeWages'     => $employeeWages,
+            'totalEmployeeWage' => $totalEmployeeWage,
             'params'       => $whereParams,
             'noOfRecords'  => $noOfRecordsPerPage,
         ]);
@@ -272,5 +275,41 @@ class EmployeeWageController extends Controller
         }
         
         return redirect()->back()->with("message","Failed to delete the employeeWage details. Error Code : ". $this->errorHead. "/". $errorCode)->with("alert-class", "error");
+    }
+
+    public function getNextWageDate(Request $request)
+    {
+        $errorCode    = 0;
+        $employeeWage = [];
+        $nextWageDate = '';
+
+        $whereParams = [
+            'employee_id' => [
+                'paramName'     => 'employee_id',
+                'paramOperator' => '=',
+                'paramValue'    => $request->get('employee_id'),
+            ],
+        ];
+
+        try {
+            //getEmployeeWages($whereParams=[],$orWhereParams=[],$relationalParams=[],$orderBy=['by' => 'id', 'order' => 'asc', 'num' => null], $aggregates=['key' => null, 'value' => null], $withParams=[],$activeFlag=true)
+            $employeeWage = $this->employeeWageRepo->getEmployeeWages($whereParams, [], [], ['by' => 'id', 'order' => 'desc', 'num' => 1], [], [], true);
+
+            if(!empty($employeeWage) && !empty($employeeWage->id)) {
+                $employeeLastWageDate = $employeeWage->to_date;
+                $nextWageDate = new \DateTime($employeeLastWageDate);
+                $nextWageDate->modify('+1 day');
+                $nextWageDate = $nextWageDate->format('m-d-Y');
+            }
+        } catch (\Exception $e) {
+            return [
+                'flag'         => false,
+            ];
+        }
+
+        return [
+            'flag'         => true,
+            'nextWageDate' => $nextWageDate,
+        ];
     }
 }

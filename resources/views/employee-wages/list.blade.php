@@ -30,14 +30,14 @@
                                     <div class="form-group">
                                         <div class="col-md-3">
                                             <label for="from_date" class="control-label">From Date : </label>
-                                            <input type="text" class="form-control datepicker" name="from_date" id="from_date" value="{{ !empty(old('from_date')) ? old('from_date') : $params['from_date']['paramValue'] }}" tabindex="1">
+                                            <input type="text" class="form-control" name="from_date" id="from_date" value="{{ !empty(old('from_date')) ? old('from_date') : $params['from_date']['paramValue'] }}" tabindex="1">
                                             {{-- adding error_message p tag component --}}
                                             @component('components.paragraph.error_message', ['fieldName' => 'from_date'])
                                             @endcomponent
                                         </div>
                                         <div class="col-md-3">
                                             <label for="to_date" class="control-label">To Date : </label>
-                                            <input type="text" class="form-control datepicker" name="to_date" id="to_date" value="{{ !empty(old('to_date')) ? old('to_date') : $params['to_date']['paramValue'] }}" tabindex="2">
+                                            <input type="text" class="form-control" name="to_date" id="to_date" value="{{ !empty(old('to_date')) ? old('to_date') : $params['to_date']['paramValue'] }}" tabindex="2">
                                             {{-- adding error_message p tag component --}}
                                             @component('components.paragraph.error_message', ['fieldName' => 'to_date'])
                                             @endcomponent
@@ -54,7 +54,7 @@
                                         <div class="col-md-3">
                                             <label for="no_of_records" class="control-label">No Of Records Per Page : </label>
                                             {{-- adding no of records text component --}}
-                                            @component('components.texts.no-of-records-text', ['noOfRecords' => $noOfRecords, 'tabindex' => 6])
+                                            @component('components.texts.no-of-records-text', ['noOfRecords' => $noOfRecords, 'tabindex' => 4])
                                             @endcomponent
                                             {{-- adding error_message p tag component --}}
                                             @component('components.paragraph.error_message', ['fieldName' => 'no_of_records'])
@@ -67,10 +67,10 @@
                             <div class="row">
                                 <div class="col-md-4"></div>
                                 <div class="col-md-2">
-                                    <button type="reset" class="btn btn-default btn-block btn-flat"  value="reset" tabindex="8">Clear</button>
+                                    <button type="reset" class="btn btn-default btn-block btn-flat"  value="reset" tabindex="6">Clear</button>
                                 </div>
                                 <div class="col-md-2">
-                                    <button type="submit" class="btn btn-primary btn-block btn-flat submit-button" tabindex="7"><i class="fa fa-search"></i> Search</button>
+                                    <button type="submit" class="btn btn-primary btn-block btn-flat submit-button" tabindex="5"><i class="fa fa-search"></i> Search</button>
                                 </div>
                             </div>
                         </form>
@@ -102,7 +102,7 @@
                                             <th style="width: 5%;">#</th>
                                             <th style="width: 10%;">Transaction Date</th>
                                             <th style="width: 20%;">Employee</th>
-                                            <th style="width: 20%;">Wage Date</th>
+                                            <th style="width: 20%;">Date</th>
                                             <th style="width: 20%;">Notes</th>
                                             <th style="width: 15%;">Amount</th>
                                             <th style="width: 5%;" class="no-print">Edit</th>
@@ -116,11 +116,11 @@
                                                     <td>{{ $index + $employeeWages->firstItem() }}</td>
                                                     <td>{{ $employeeWage->transaction->transaction_date->format('d-m-Y') }}</td>
                                                     <td>{{ $employeeWage->employee->account->name }}</td>
-                                                    <td>{{ $employeeWage->from_date->format('d-m-Y'). " - ". $employeeWage->to_date->format('d-m-Y') }}</td>
+                                                    <td>{{ $employeeWage->from_date->format('d-m-Y'). " -to- ". $employeeWage->to_date->format('d-m-Y') }}</td>
                                                     <td>{{ $employeeWage->description }}</td>
                                                     <td>{{ $employeeWage->wage }}</td>
                                                     <td class="no-print">
-                                                        <a href="{{ route('employee-wage.edit', ['id' => $employeeWage->id]) }}" style="float: left;">
+                                                        <a href="{{ route('employee-wage.edit', $employeeWage->id) }}" style="float: left;">
                                                             <button type="button" class="btn btn-warning"><i class="fa fa-edit"></i> Edit</button>
                                                         </a>
                                                     </td>
@@ -173,4 +173,32 @@
     </section>
     <!-- /.content -->
 </div>
+@endsection
+@section('scripts')
+    <script type="text/javascript">
+        $(function () {
+            $('#from_date').datepicker({
+                format: 'dd-mm-yyyy',
+                endDate: '+0d',
+                autoclose: true,
+            }).on('changeDate', function(e) {
+                    var selectedDate = new Date(e.date);
+                    var msecsInADay = 86400000;
+                    var endDate = new Date(selectedDate.getTime() + msecsInADay);
+                    
+                   //Set Minimum Date of EndDatePicker After Selected Date of StartDatePicker
+                    $("#to_date").datepicker("setStartDate", endDate );
+                });
+
+            $('#to_date').datepicker({
+                format: 'dd-mm-yyyy',
+                autoclose: true,
+                endDate: '+0d',
+            });
+
+            $('body').on("change keypress", "#from_date", function (evt) {
+                $('#to_date').datepicker('setDate', '');
+            });
+        });
+    </script>
 @endsection

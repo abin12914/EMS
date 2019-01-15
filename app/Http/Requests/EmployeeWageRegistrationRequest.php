@@ -24,7 +24,33 @@ class EmployeeWageRegistrationRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'employee_id'   =>  [
+                                    'required',
+                                    'exists:employees,id',
+                                ],
+            'from_date'     =>  [
+                                    'required',
+                                    'date_format:d-m-Y',
+                                    'before:tomorrow',
+                                    'before_or_equal:to_date'
+                                ],
+            'to_date'       =>  [
+                                    'nullable',
+                                    'date_format:d-m-Y',
+                                    'before:tomorrow',
+                                    'after_or_equal:from_date'
+                                ],
+            'description'   =>  [
+                                    'required',
+                                    'min:4',
+                                    'max:200',
+                                ],
+            'wage_amount'   =>  [
+                                    'required',
+                                    'numeric',
+                                    'min:10',
+                                    'max:99999',
+                                ],
         ];
     }
 }

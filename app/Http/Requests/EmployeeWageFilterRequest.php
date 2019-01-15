@@ -24,7 +24,28 @@ class EmployeeWageFilterRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'from_date'     =>  [
+                                    'nullable',
+                                    'date_format:d-m-Y'
+                                ],
+            'to_date'       =>  [
+                                    'nullable',
+                                    'date_format:d-m-Y'
+                                ],
+            'employee_id'    =>  [
+                                    'nullable',
+                                    'exists:employees,id'
+                                ],
+            'no_of_records' =>  [
+                                    'nullable',
+                                    'min:2',
+                                    'max:100',
+                                    'integer',
+                                ],
+            'page'          =>  [
+                                    'nullable',
+                                    'integer',
+                                ],
         ];
     }
 }

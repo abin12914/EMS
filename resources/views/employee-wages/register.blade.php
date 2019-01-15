@@ -28,8 +28,8 @@
                         <!-- /.box-header -->
                         <!-- form start -->
                         <form action="{{route('employee-wage.store')}}" method="post" class="form-horizontal" autocomplete="off">
+                            <input type="hidden" name="_token" value="{{csrf_token()}}">
                             <div class="box-body">
-                                <input type="hidden" name="_token" value="{{csrf_token()}}">
                                 <div class="row">
                                     <div class="col-md-1"></div>
                                     <div class="col-md-10">
@@ -46,7 +46,7 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label for="from_date" class="control-label"><b style="color: red;">* </b> From Date : </label>
-                                                    <input type="text" class="form-control decimal_number_only datepicker_reg" name="from_date" id="from_date" placeholder="From date" value="{{ old('from_date') }}" tabindex="2">
+                                                    <input type="text" class="form-control decimal_number_only" name="from_date" id="from_date" placeholder="From date" value="{{ old('from_date') }}" tabindex="2">
                                                     {{-- adding error_message p tag component --}}
                                                     @component('components.paragraph.error_message', ['fieldName' => 'from_date'])
                                                     @endcomponent
@@ -57,14 +57,14 @@
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <label for="to_date" class="control-label">To Date [Use only if generating wage for multiple days] : </label>
-                                                    <input type="text" class="form-control decimal_number_only datepicker_reg" name="to_date" id="to_date" placeholder="To date" value="{{ old('to_date') }}" tabindex="3">
+                                                    <input type="text" class="form-control decimal_number_only" name="to_date" id="to_date" placeholder="To date" value="{{ old('to_date') }}" tabindex="3">
                                                     {{-- adding error_message p tag component --}}
                                                     @component('components.paragraph.error_message', ['fieldName' => 'to_date'])
                                                     @endcomponent
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label for="wage_amount" class="control-label"><b style="color: red;">* </b> Wage/Salary Amount: </label>
-                                                    <input type="text" class="form-control decimal_number_only" name="wage_amount" id="wage_amount" placeholder="Bill amount" value="{{ old('wage_amount') }}" maxlength="8" tabindex="4">
+                                                    <input type="text" class="form-control decimal_number_only" name="wage_amount" id="wage_amount" placeholder="Bill amount" value="{{ old('wage_amount') }}" maxlength="5" minlength="1" tabindex="4">
                                                     {{-- adding error_message p tag component --}}
                                                     @component('components.paragraph.error_message', ['fieldName' => 'wage_amount'])
                                                     @endcomponent
