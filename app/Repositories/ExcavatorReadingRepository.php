@@ -43,7 +43,7 @@ class ExcavatorReadingRepository extends Repository
             return (!empty($aggregates['key']) ? parent::aggregatesSwitch($excavatorReadings, $aggregates) : parent::getFilter($excavatorReadings, $orderBy));
         } catch (Exception $e) {
             $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 1);
-dd($e);
+
             throw new AppCustomException("CustomError", $this->errorCode);
         }
 

@@ -1,10 +1,10 @@
 @extends('layouts.app')
-@section('title', 'ExcavatorReading List')
+@section('title', 'Excavator Reading List')
 @section('content')
 <div class="content-wrapper">
      <section class="content-header">
         <h1>
-            ExcavatorReading
+            Excavator Reading
             <small>List</small>
         </h1>
         <ol class="breadcrumb">
@@ -23,35 +23,69 @@
                     </div>
                     <!-- /.box-header -->
                     <div class="box-header">
-                        <form action="{{ route('employee-wage.index') }}" method="get" class="form-horizontal" autocomplete="off">
+                        <form action="{{ route('excavator-reading.index') }}" method="get" class="form-horizontal" autocomplete="off">
                             <div class="row">
                                 <div class="col-md-1"></div>
                                 <div class="col-md-10">
                                     <div class="form-group">
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
                                             <label for="from_date" class="control-label">From Date : </label>
                                             <input type="text" class="form-control datepicker" name="from_date" id="from_date" value="{{ !empty(old('from_date')) ? old('from_date') : $params['from_date']['paramValue'] }}" tabindex="1">
                                             {{-- adding error_message p tag component --}}
                                             @component('components.paragraph.error_message', ['fieldName' => 'from_date'])
                                             @endcomponent
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-2">
                                             <label for="to_date" class="control-label">To Date : </label>
                                             <input type="text" class="form-control datepicker" name="to_date" id="to_date" value="{{ !empty(old('to_date')) ? old('to_date') : $params['to_date']['paramValue'] }}" tabindex="2">
                                             {{-- adding error_message p tag component --}}
                                             @component('components.paragraph.error_message', ['fieldName' => 'to_date'])
                                             @endcomponent
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
+                                            <label for="excavator_id" class="control-label">Excavator : </label>
+                                            {{-- adding excavator select component --}}
+                                            @component('components.selects.excavators', ['selectedExcavatorId' => $params['excavator_id']['paramValue'], 'selectName' => 'excavator_id', 'tabindex' => 3])
+                                            @endcomponent
+                                            {{-- adding error_message p tag component --}}
+                                            @component('components.paragraph.error_message', ['fieldName' => 'excavator_id'])
+                                            @endcomponent
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="account_id" class="control-label">Customer : </label>
+                                            {{-- adding account select component --}}
+                                            @component('components.selects.accounts', ['selectedAccountId' => $params['account_id']['paramValue'], 'selectName' => 'account_id', 'cashAccountFlag' => true, 'activeFlag' => true, 'tabindex' => 3])
+                                            @endcomponent
+                                            {{-- adding error_message p tag component --}}
+                                            @component('components.paragraph.error_message', ['fieldName' => 'account_id'])
+                                            @endcomponent
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-1"></div>
+                                <div class="col-md-10">
+                                    <div class="form-group">
+                                        <div class="col-md-4">
+                                            <label for="site_id" class="control-label">Site : </label>
+                                            {{-- adding site select component --}}
+                                            @component('components.selects.sites', ['selectedSiteId' => $params['excavator_id']['paramValue'], 'selectName' => 'site_id', 'tabindex' => 3])
+                                            @endcomponent
+                                            {{-- adding error_message p tag component --}}
+                                            @component('components.paragraph.error_message', ['fieldName' => 'site_id'])
+                                            @endcomponent
+                                        </div>
+                                        <div class="col-md-4">
                                             <label for="employee_id" class="control-label">Employee : </label>
                                             {{-- adding employee select component --}}
-                                            @component('components.selects.employees', ['selectedEmployeeId' => $params['excavator_id']['paramValue'], 'selectName' => 'employee_id', 'tabindex' => 3])
+                                            @component('components.selects.employees', ['selectedEmployeeId' => $params['employee_id']['paramValue'], 'selectName' => 'employee_id', 'tabindex' => 3])
                                             @endcomponent
                                             {{-- adding error_message p tag component --}}
                                             @component('components.paragraph.error_message', ['fieldName' => 'employee_id'])
                                             @endcomponent
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
                                             <label for="no_of_records" class="control-label">No Of Records Per Page : </label>
                                             {{-- adding no of records text component --}}
                                             @component('components.texts.no-of-records-text', ['noOfRecords' => $noOfRecords, 'tabindex' => 6])
@@ -99,12 +133,16 @@
                                 <table class="table table-responsive table-bordered table-hover">
                                     <thead>
                                         <tr>
-                                            <th style="width: 5%;">#</th>
-                                            <th style="width: 10%;">Transaction Date</th>
-                                            <th style="width: 20%;">Employee</th>
-                                            <th style="width: 20%;">Wage Date</th>
-                                            <th style="width: 20%;">Notes</th>
-                                            <th style="width: 15%;">Amount</th>
+                                            <th style="width: 3%;">#</th>
+                                            <th style="width: 7%;">Reading Date</th>
+                                            <th style="width: 10%;">Excavator</th>
+                                            <th style="width: 10%;">Customer</th>
+                                            <th style="width: 10%;">Site</th>
+                                            <th style="width: 10%;">Operator</th>
+                                            <th style="width: 10%;">Bucket</th>
+                                            <th style="width: 10%;">Breaker</th>
+                                            <th style="width: 10%;">Notes</th>
+                                            <th style="width: 10%;">Total Rent</th>
                                             <th style="width: 5%;" class="no-print">Edit</th>
                                             <th style="width: 5%;" class="no-print">Delete</th>
                                         </tr>
@@ -114,18 +152,22 @@
                                             @foreach($excavatorReadings as $index => $excavatorReading)
                                                 <tr>
                                                     <td>{{ $index + $excavatorReadings->firstItem() }}</td>
-                                                    <td>{{ $excavatorReading->reading_date }}</td>
-                                                    <td>{{ $excavatorReading->name }}</td>
-                                                    <td>{{ $excavatorReading->reading_date->format('d-m-Y'). " - ". $excavatorReading->reading_date->format('d-m-Y') }}</td>
+                                                    <td>{{ $excavatorReading->reading_date->format('d-m-Y') }}</td>
+                                                    <td>{{ $excavatorReading->excavator->name }}</td>
+                                                    <td>{{ $excavatorReading->transaction->debitAccount->account_name }}</td>
+                                                    <td>{{ $excavatorReading->site->name }}</td>
+                                                    <td>{{ $excavatorReading->operator->account->name }}</td>
+                                                    <td>{{ $excavatorReading->bucket_hour. " x ". $excavatorReading->bucket_rate }}</td>
+                                                    <td>{{ $excavatorReading->breaker_hour. " x ". $excavatorReading->breaker_rate }}</td>
                                                     <td>{{ $excavatorReading->description }}</td>
-                                                    <td>{{ $excavatorReading->wage }}</td>
+                                                    <td>{{ $excavatorReading->total_rent }}</td>
                                                     <td class="no-print">
-                                                        <a href="{{ route('employee-wage.edit', ['id' => $excavatorReading->id]) }}" style="float: left;">
+                                                        <a href="{{ route('excavator-reading.edit', ['id' => $excavatorReading->id]) }}" style="float: left;">
                                                             <button type="button" class="btn btn-warning"><i class="fa fa-edit"></i> Edit</button>
                                                         </a>
                                                     </td>
                                                     <td class="no-print">
-                                                        <form action="{{ route('employee-wage.destroy', $excavatorReading->id) }}" method="post" class="form-horizontal">
+                                                        <form action="{{ route('excavator-reading.destroy', $excavatorReading->id) }}" method="post" class="form-horizontal">
                                                             {{ method_field('DELETE') }}
                                                             {{ csrf_field() }}
                                                             <button type="button" class="btn btn-danger delete_button"><i class="fa fa-trash"></i> Delete</button>
@@ -138,6 +180,10 @@
                                                     <td></td>
                                                     <td></td>
                                                     <td class="text-red"><b>Total Amount</b></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
                                                     <td></td>
                                                     <td></td>
                                                     <td class="text-red"><b>{{ $totalExcavatorReading }}</b></td>

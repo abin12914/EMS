@@ -59,29 +59,29 @@ class ExcavatorReadingController extends Controller
                 'paramOperator' => '=',
                 'paramValue'    => $request->get('site_id'),
             ],
-            'operator_id' => [
+            'employee_id' => [
                 'paramName'     => 'operator_id',
                 'paramOperator' => '=',
-                'paramValue'    => $request->get('operator_id'),
+                'paramValue'    => $request->get('employee_id'),
             ],
         ];
 
         $relationalParams = [
-            'customer_account_id' => [
+            'account_id' => [
                 'relation'      => 'transaction',
                 'paramName'     => 'debit_account_id',
                 'paramOperator' => '=',
-                'paramValue'    => $request->get('customer_account_id'),
+                'paramValue'    => $request->get('account_id'),
             ]
         ];
         //params passing for auto selection
         $whereParams['from_date']['paramValue'] = $request->get('from_date');
         $whereParams['to_date']['paramValue']   = $request->get('to_date');
         
-        //getExcavatorReadings($whereParams=[],$orWhereParams=[],$relationalParams=[],$orderBy=['by' => 'id', 'order' => 'asc', 'num' => null], $withParams=[],$activeFlag=true)
+        //getExcavatorReadings($whereParams=[],$orWhereParams=[],$relationalParams=[],$orderBy=['by' => 'id', 'order' => 'asc', 'num' => null],$aggregates=['key' => null, 'value' => null],$withParams=[],$activeFlag=true)
         return view('excavator-readings.list', [
-            'excavatorReadings' => $this->excavatorReadingRepo->getExcavatorReadings($whereParams, [], $relationalParams, ['by' => 'id', 'order' => 'asc', 'num' => $noOfRecordsPerPage], [], [], true),
-            'totalExcavatorReading' => $this->excavatorReadingRepo->getExcavatorReadings($whereParams, [], $relationalParams, [], ['key' => 'sum', 'value' => 'breaker_hour'], [], true),
+            'excavatorReadings' => $this->excavatorReadingRepo->getExcavatorReadings($whereParams, [], $relationalParams, ['by' => 'id', 'order' => 'asc', 'num' => $noOfRecordsPerPage], ['excavator', 'transaction.debitAccount', 'site', 'operator.account'], [], true),
+            'totalExcavatorReading' => $this->excavatorReadingRepo->getExcavatorReadings($whereParams, [], $relationalParams, [], ['key' => 'sum', 'value' => 'total_rent'], [], true),
             'params'       => array_merge($whereParams, $relationalParams),
             'noOfRecords'  => $noOfRecordsPerPage,
         ]);
@@ -133,8 +133,8 @@ class ExcavatorReadingController extends Controller
 
             //save excavatorReading transaction to table
             $transactionResponse   = $transactionRepo->saveTransaction([
-                'debit_account_id'  => $excavatorRentAccountId, // debit the excavatorRent Account
-                'credit_account_id' => $request->get('customer_account_id'), // credit the supplier
+                'debit_account_id'  => $request->get('customer_account_id'), // debit the customer
+                'credit_account_id' => $excavatorRentAccountId, // credit the excavatorRent Account
                 'amount'            => $request->get('total_rent'),
                 'transaction_date'  => $transactionDate,
                 'particulars'       => $request->get('description'). $particulars,
@@ -152,7 +152,7 @@ class ExcavatorReadingController extends Controller
                 'excavator_id'   => $request->get('excavator_id'),
                 'transaction_id' => $transactionResponse['transaction']->id,
                 'site_id'        => $request->get('site_id'),
-                'operator_id'    => $request->get('operator_id'),
+                'operator_id'    => $request->get('employee_id'),
                 'description'    => $request->get('description'),
                 'bucket_hour'    => $request->get('bucket_hour'),
                 'bucket_rate'    => $request->get('bucket_rate'),
@@ -177,11 +177,11 @@ class ExcavatorReadingController extends Controller
                 ];
             }
 
-            return redirect(route('excavator-reading.index'))->with("message","ExcavatorReading details saved successfully. Reference Number : ". $excavatorReadingResponse['excavatorReading'])->with("alert-class", "success");
+            return redirect(route('excavator-reading.index'))->with("message","ExcavatorReading details saved successfully. Reference Number : ". $excavatorReadingResponse['excavatorReading']->id)->with("alert-class", "success");
         } catch (Exception $e) {
             //roll back in case of exceptions
             DB::rollback();
-dd($e);
+
             $errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : 1);
         }
         if(!empty($id)) {
@@ -258,7 +258,7 @@ dd($e);
         $updateResponse = $this->store($request, $transactionRepo, $accountRepo, $id);
 
         if($updateResponse['flag']) {
-            return redirect(route('excavatorReadings.show', $updateResponse['excavatorReadings']->id))->with("message","ExcavatorReadings details updated successfully. Updated Record Number : ". $updateResponse['excavatorReadings']->id)->with("alert-class", "success");
+            return redirect(route('excavator-reading.index'))->with("message","ExcavatorReadings details updated successfully. Updated Record Number : ". $updateResponse['excavatorReading']->id)->with("alert-class", "success");
         }
         
         return redirect()->back()->with("message","Failed to update the excavatorReadings details. Error Code : ". $this->errorHead. "/". $updateResponse['errorCode'])->with("alert-class", "error");
@@ -293,5 +293,31 @@ dd($e);
         }
         
         return redirect()->back()->with("message","Failed to delete the excavatorReading details. Error Code : ". $this->errorHead. "/". $errorCode)->with("alert-class", "error");
+    }
+
+    public function getLastReadingDetail(Request $request)
+    {
+        $lastExcavatorReading = [];
+        $whereParams = [
+            'excavator_id' => [
+                'paramName'     => 'excavator_id',
+                'paramOperator' => '=',
+                'paramValue'    => $request->get('excavator_id'),
+            ],
+        ];
+
+        try {
+            //getExcavatorReadings($whereParams=[],$orWhereParams=[],$relationalParams=[],$orderBy=['by' => 'id', 'order' => 'asc', 'num' => null],$aggregates=['key' => null, 'value' => null],$withParams=[],$activeFlag=true)
+            $lastExcavatorReading = $this->excavatorReadingRepo->getExcavatorReadings($whereParams, [], [], ['by' => 'id', 'order' => 'desc', 'num' => 1], ['key' => null, 'value' => null], ['transaction'], true);
+        } catch (\Exception $e) {
+            return [
+                'flag' => false,
+            ];
+        }
+
+        return [
+            'flag'        => true,
+            'lastReading' => $lastExcavatorReading,
+        ];
     }
 }
