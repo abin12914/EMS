@@ -36,19 +36,19 @@
                                         <div class="form-group">
                                             <div class="row">
                                                 <div class="col-md-6">
-                                                    <label for="date" class="control-label"><b style="color: red;">* </b> Date : </label>
-                                                    <input type="text" class="form-control decimal_number_only datepicker_reg" name="date" id="date" placeholder="Transaction date" value="{{ old('date') }}" tabindex="1">
+                                                    <label for="transaction_date" class="control-label"><b style="color: red;">* </b> Date : </label>
+                                                    <input type="text" class="form-control decimal_number_only datepicker_reg" name="transaction_date" id="transaction_date" placeholder="Transaction date" value="{{ old('transaction_date') }}" tabindex="1">
                                                     {{-- adding error_message p tag component --}}
-                                                    @component('components.paragraph.error_message', ['fieldName' => 'date'])
+                                                    @component('components.paragraph.error_message', ['fieldName' => 'transaction_date'])
                                                     @endcomponent
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <label for="supplier_account_id" class="control-label"><b style="color: red;">* </b> Supplier : </label>
+                                                    <label for="account_id" class="control-label"><b style="color: red;">* </b> Supplier : </label>
                                                     {{-- adding account select component --}}
-                                                    @component('components.selects.accounts', ['selectedAccountId' => old('supplier_account_id'), 'cashAccountFlag' => true, 'selectName' => 'supplier_account_id', 'activeFlag' => false, 'tabindex' => 2])
+                                                    @component('components.selects.accounts', ['selectedAccountId' => old('account_id'), 'cashAccountFlag' => true, 'selectName' => 'account_id', 'activeFlag' => false, 'tabindex' => 2])
                                                     @endcomponent
                                                     {{-- adding error_message p tag component --}}
-                                                    @component('components.paragraph.error_message', ['fieldName' => 'supplier_account_id'])
+                                                    @component('components.paragraph.error_message', ['fieldName' => 'account_id'])
                                                     @endcomponent
                                                 </div>
                                             </div>
@@ -67,7 +67,7 @@
                                                 <div class="col-md-6">
                                                     <label for="service_id" class="control-label"><b style="color: red;">* </b> Service : </label>
                                                     {{-- adding services select component --}}
-                                                    @component('components.selects.services', ['selectedServiceId' => old('service_id'), 'selectName' => 'service_id', 'tabindex' => 3])
+                                                    @component('components.selects.services', ['selectedServiceId' => old('service_id'), 'selectName' => 'service_id', 'tabindex' => 4])
                                                     @endcomponent
                                                     {{-- adding error_message p tag component --}}
                                                     @component('components.paragraph.error_message', ['fieldName' => 'service_id'])
@@ -90,7 +90,7 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label for="bill_amount" class="control-label"><b style="color: red;">* </b> Bill Amount: </label>
-                                                    <input type="text" class="form-control decimal_number_only" name="bill_amount" id="bill_amount" placeholder="Bill amount" value="{{ old('bill_amount') }}" maxlength="8" tabindex="4">
+                                                    <input type="text" class="form-control decimal_number_only" name="bill_amount" id="bill_amount" placeholder="Bill amount" value="{{ old('bill_amount') }}" maxlength="8" tabindex="6">
                                                     {{-- adding error_message p tag component --}}
                                                     @component('components.paragraph.error_message', ['fieldName' => 'bill_amount'])
                                                     @endcomponent
@@ -103,10 +103,10 @@
                                 <div class="row">
                                     <div class="col-md-3"></div>
                                     <div class="col-md-3">
-                                        <button type="reset" class="btn btn-default btn-block btn-flat" tabindex="7">Clear</button>
+                                        <button type="reset" class="btn btn-default btn-block btn-flat" tabindex="8">Clear</button>
                                     </div>
                                     <div class="col-md-3">
-                                        <button type="submit" class="btn btn-primary btn-block btn-flat submit-button" tabindex="6">Submit</button>
+                                        <button type="submit" class="btn btn-primary btn-block btn-flat submit-button" tabindex="7">Submit</button>
                                     </div>
                                     <!-- /.col -->
                                 </div><br>

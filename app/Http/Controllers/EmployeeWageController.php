@@ -68,8 +68,8 @@ class EmployeeWageController extends Controller
         return view('employee-wages.list', [
             'employeeWages'     => $employeeWages,
             'totalEmployeeWage' => $totalEmployeeWage,
-            'params'       => $whereParams,
-            'noOfRecords'  => $noOfRecordsPerPage,
+            'params'            => $whereParams,
+            'noOfRecords'       => $noOfRecordsPerPage,
         ]);
     }
 

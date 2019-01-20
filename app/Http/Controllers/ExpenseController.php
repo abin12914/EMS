@@ -22,8 +22,8 @@ class ExpenseController extends Controller
 
     public function __construct(ExpenseRepository $expenseRepo)
     {
-        $this->expenseRepo          = $expenseRepo;
-        $this->errorHead            = config('settings.controller_code.ExpenseController');
+        $this->expenseRepo = $expenseRepo;
+        $this->errorHead   = config('settings.controller_code.ExpenseController');
     }
 
     /**
@@ -54,14 +54,19 @@ class ExpenseController extends Controller
                 'paramOperator' => '=',
                 'paramValue'    => $request->get('service_id'),
             ],
+            'excavator_id' => [
+                'paramName'     => 'excavator_id',
+                'paramOperator' => '=',
+                'paramValue'    => $request->get('excavator_id'),
+            ],
         ];
 
         $relationalParams = [
-            'supplier_account_id' => [
+            'account_id' => [
                 'relation'      => 'transaction',
                 'paramName'     => 'credit_account_id',
                 'paramOperator' => '=',
-                'paramValue'    => $request->get('supplier_account_id'),
+                'paramValue'    => $request->get('account_id'),
             ]
         ];
         //params passing for auto selection
@@ -103,7 +108,7 @@ class ExpenseController extends Controller
         $expense   = null;
 
         $expenseAccountId   = config('constants.accountConstants.ServiceAndExpense.id');
-        $transactionDate    = Carbon::createFromFormat('d-m-Y', $request->get('date'))->format('Y-m-d');
+        $transactionDate    = Carbon::createFromFormat('d-m-Y', $request->get('transaction_date'))->format('Y-m-d');
         $totalBill          = $request->get('bill_amount');
 
         //wrappin db transactions

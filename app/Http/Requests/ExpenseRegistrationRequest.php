@@ -25,33 +25,33 @@ class ExpenseRegistrationRequest extends FormRequest
     public function rules()
     {
         return [
-            'date'                  =>  [
-                                            'required',
-                                            'date_format:d-m-Y',
-                                        ],
-            'supplier_account_id'   =>  [
-                                            'required',
-                                            'exists:accounts,id',
-                                        ],
-            'excavator_id'          =>  [
-                                            'required',
-                                            'exists:excavators,id',
-                                        ],
-            'service_id'            =>  [
-                                            'required',
-                                            'exists:services,id',
-                                        ],
-            'description'           =>  [
-                                            'required',
-                                            'min:5',
-                                            'max:200',
-                                        ],
-            'bill_amount'           =>  [
-                                            'required',
-                                            'numeric',
-                                            'min:1',
-                                            'max:999999',
-                                        ],
+            'transaction_date'  =>  [
+                                        'required',
+                                        'date_format:d-m-Y',
+                                    ],
+            'account_id'        =>  [
+                                        'required',
+                                        'exists:accounts,id',
+                                    ],
+            'excavator_id'      =>  [
+                                        'required',
+                                        'exists:excavators,id',
+                                    ],
+            'service_id'        =>  [
+                                        'required',
+                                        'exists:services,id',
+                                    ],
+            'description'       =>  [
+                                        'required',
+                                        'min:5',
+                                        'max:200',
+                                    ],
+            'bill_amount'       =>  [
+                                        'required',
+                                        'numeric',
+                                        'min:1',
+                                        'max:999999',
+                                    ],
         ];
     }
 }

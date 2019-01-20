@@ -24,7 +24,40 @@ class ExcavatorRentRegistrationRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'excavator_id'  =>  [
+                                    'required',
+                                    'exists:excavators,id',
+                                ],
+            'account_id'    =>  [
+                                    'required',
+                                    'exists:accounts,id',
+                                ],
+            'site_id'       =>  [
+                                    'required',
+                                    'exists:sites,id',
+                                ],
+            'from_date'     =>  [
+                                    'required',
+                                    'date_format:d-m-Y',
+                                    'before:tomorrow',
+                                    'before_or_equal:to_date'
+                                ],
+            'to_date'       =>  [
+                                    'nullable',
+                                    'date_format:d-m-Y',
+                                    'before:tomorrow',
+                                    'after_or_equal:from_date'
+                                ],
+            'description'   =>  [
+                                    'nullable',
+                                    'max:200',
+                                ],
+            'total_rent'    =>  [
+                                    'required',
+                                    'numeric',
+                                    'min:10',
+                                    'max:999999',
+                                ],
         ];
     }
 }

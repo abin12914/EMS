@@ -85,7 +85,7 @@
                             </li>
                         </ul>
                     </li>
-                    <li class="treeview {{ Request::is('excavator-reading/*') || Request::is('excavator-reading')? 'active' : '' }}">
+                    <li class="treeview {{ Request::is('excavator-rent/*') || Request::is('excavator-rent')? 'active' : '' }}">
                         <a href="#">
                             <i class="fa fa-user"></i>
                             <span>Excavator Rent</span>

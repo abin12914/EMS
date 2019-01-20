@@ -76,9 +76,9 @@
                                                 <div class="col-md-12">
                                                     <label for="description" class="control-label"><b style="color: red;">* </b> Description: </label>
                                                     @if(!empty(old('description')))
-                                                        <textarea class="form-control" name="description" id="description" rows="2" placeholder="Description" style="resize: none;" tabindex="5">{{ old('description') }}</textarea>
+                                                        <textarea class="form-control" name="description" id="description" rows="2" placeholder="Description" style="resize: none;" tabindex="5" maxlength="200">{{ old('description') }}</textarea>
                                                     @else
-                                                        <textarea class="form-control" name="description" id="description" rows="2" placeholder="Description" style="resize: none;" tabindex="5"></textarea>
+                                                        <textarea class="form-control" name="description" id="description" rows="2" placeholder="Description" style="resize: none;" tabindex="5" maxlength="200"></textarea>
                                                     @endif
                                                     {{-- adding error_message p tag component --}}
                                                     @component('components.paragraph.error_message', ['fieldName' => 'description'])

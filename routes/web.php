@@ -65,7 +65,7 @@ Route::group(['middleware' => 'auth.check'], function () {
         Route::group(['middleware' => 'is.ajax'], function () {
             Route::get('/ajax/account/details/{id}', 'AccountController@getDetails')->name('ajax.account.details');
             Route::get('/ajax/employee-wage/next-wage-date', 'EmployeeWageController@getNextWageDate')->name('ajax.employee-wage.next-wage-date');
-            Route::get('/ajax/excavator-reading/last', 'ExcavatorReadingController@getLastReadingDetail')->name('ajax.excavator-reading.last');
+            //Route::get('/ajax/excavator-reading/last', 'ExcavatorRentController@getNextRentDate')->name('ajax.excavator-rent.last');
         });
     });
 });

@@ -43,7 +43,7 @@ class ExcavatorRentRepository extends Repository
             return (!empty($aggregates['key']) ? parent::aggregatesSwitch($excavatorRents, $aggregates) : parent::getFilter($excavatorRents, $orderBy));
         } catch (Exception $e) {
             $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 1);
-dd($e);
+
             throw new AppCustomException("CustomError", $this->errorCode);
         }
 

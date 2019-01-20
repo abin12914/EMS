@@ -27,47 +27,62 @@
                             <div class="row">
                                 <div class="col-md-1"></div>
                                 <div class="col-md-10">
-                                    <div class="form-group">
-                                        <div class="col-md-2">
-                                            <label for="from_date" class="control-label">From Date : </label>
-                                            <input type="text" class="form-control datepicker" name="from_date" id="from_date" value="{{ !empty(old('from_date')) ? old('from_date') : $params['from_date']['paramValue'] }}" tabindex="1">
-                                            {{-- adding error_message p tag component --}}
-                                            @component('components.paragraph.error_message', ['fieldName' => 'from_date'])
-                                            @endcomponent
+                                    <div class="row">
+                                        <div class="form-group">
+                                            <div class="col-md-4">
+                                                <label for="from_date" class="control-label">From Date : </label>
+                                                <input type="text" class="form-control datepicker" name="from_date" id="from_date" value="{{ !empty(old('from_date')) ? old('from_date') : $params['from_date']['paramValue'] }}" tabindex="1">
+                                                {{-- adding error_message p tag component --}}
+                                                @component('components.paragraph.error_message', ['fieldName' => 'from_date'])
+                                                @endcomponent
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label for="to_date" class="control-label">To Date : </label>
+                                                <input type="text" class="form-control datepicker" name="to_date" id="to_date" value="{{ !empty(old('to_date')) ? old('to_date') : $params['to_date']['paramValue'] }}" tabindex="2">
+                                                {{-- adding error_message p tag component --}}
+                                                @component('components.paragraph.error_message', ['fieldName' => 'to_date'])
+                                                @endcomponent
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label for="service_id" class="control-label">Service/Expense : </label>
+                                                {{-- adding services select component --}}
+                                                @component('components.selects.services', ['selectedServiceId' => $params['service_id']['paramValue'], 'selectName' => 'service_id', 'tabindex' => 3])
+                                                @endcomponent
+                                                {{-- adding error_message p tag component --}}
+                                                @component('components.paragraph.error_message', ['fieldName' => 'service_id'])
+                                                @endcomponent
+                                            </div>
                                         </div>
-                                        <div class="col-md-2">
-                                            <label for="to_date" class="control-label">To Date : </label>
-                                            <input type="text" class="form-control datepicker" name="to_date" id="to_date" value="{{ !empty(old('to_date')) ? old('to_date') : $params['to_date']['paramValue'] }}" tabindex="2">
-                                            {{-- adding error_message p tag component --}}
-                                            @component('components.paragraph.error_message', ['fieldName' => 'to_date'])
-                                            @endcomponent
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label for="service_id" class="control-label">Service/Expense : </label>
-                                            {{-- adding services select component --}}
-                                            @component('components.selects.services', ['selectedServiceId' => $params['service_id']['paramValue'], 'selectName' => 'service_id', 'tabindex' => 4])
-                                            @endcomponent
-                                            {{-- adding error_message p tag component --}}
-                                            @component('components.paragraph.error_message', ['fieldName' => 'service_id'])
-                                            @endcomponent
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label for="supplier_account_id" class="control-label">Supplier : </label>
-                                            {{-- adding account select component --}}
-                                            @component('components.selects.accounts', ['selectedAccountId' => $params['supplier_account_id']['paramValue'], 'cashAccountFlag' => true, 'selectName' => 'supplier_account_id', 'activeFlag' => true, 'tabindex' => 5])
-                                            @endcomponent
-                                            {{-- adding error_message p tag component --}}
-                                            @component('components.paragraph.error_message', ['fieldName' => 'supplier_account_id'])
-                                            @endcomponent
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label for="no_of_records" class="control-label">No Of Records Per Page : </label>
-                                            {{-- adding no of records text component --}}
-                                            @component('components.texts.no-of-records-text', ['noOfRecords' => $noOfRecords, 'tabindex' => 6])
-                                            @endcomponent
-                                            {{-- adding error_message p tag component --}}
-                                            @component('components.paragraph.error_message', ['fieldName' => 'no_of_records'])
-                                            @endcomponent
+                                    </div>
+                                    <div class="row">
+                                        <div class="form-group">
+                                            <div class="col-md-4">
+                                                <label for="account_id" class="control-label">Supplier : </label>
+                                                {{-- adding account select component --}}
+                                                @component('components.selects.accounts', ['selectedAccountId' => $params['account_id']['paramValue'], 'cashAccountFlag' => true, 'selectName' => 'account_id', 'activeFlag' => true, 'tabindex' => 4])
+                                                @endcomponent
+                                                {{-- adding error_message p tag component --}}
+                                                @component('components.paragraph.error_message', ['fieldName' => 'account_id'])
+                                                @endcomponent
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label for="excavator_id" class="control-label">Excavator : </label>
+                                                {{-- adding account select component --}}
+                                                @component('components.selects.excavators', ['selectedExcavatorId' => $params['excavator_id']['paramValue'], 'selectName' => 'excavator_id', 'tabindex' => 5])
+                                                @endcomponent
+                                                {{-- adding error_message p tag component --}}
+                                                @component('components.paragraph.error_message', ['fieldName' => 'excavator_id'])
+                                                @endcomponent
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label for="no_of_records" class="control-label">No Of Records Per Page : </label>
+                                                {{-- adding no of records text component --}}
+                                                @component('components.texts.no-of-records-text', ['noOfRecords' => $noOfRecords, 'tabindex' => 6])
+                                                @endcomponent
+                                                {{-- adding error_message p tag component --}}
+                                                @component('components.paragraph.error_message', ['fieldName' => 'no_of_records'])
+                                                @endcomponent
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -110,10 +125,11 @@
                                         <tr>
                                             <th style="width: 5%;">#</th>
                                             <th style="width: 10%;">Date</th>
-                                            <th style="width: 20%;">Service</th>
+                                            <th style="width: 15%;">Service</th>
                                             <th style="width: 20%;">Supplier</th>
-                                            <th style="width: 20%;">Notes</th>
-                                            <th style="width: 15%;">Amount</th>
+                                            <th style="width: 15%;">Excavator</th>
+                                            <th style="width: 15%;">Notes</th>
+                                            <th style="width: 10%;">Amount</th>
                                             <th style="width: 5%;" class="no-print">Edit</th>
                                             <th style="width: 5%;" class="no-print">Delete</th>
                                         </tr>
@@ -125,11 +141,12 @@
                                                     <td>{{ $index + $expenses->firstItem() }}</td>
                                                     <td>{{ $expense->expense_date->format('d-m-Y') }}</td>
                                                     <td>{{ $expense->service->name }}</td>
+                                                    <td>{{ $expense->excavator->name }}</td>
                                                     <td>{{ $expense->transaction->creditAccount->account_name }}</td>
-                                                    <td>{{ str_replace("[Purchase & Expense]", "", $expense->transaction->particulars) }}</td>
+                                                    <td>{{ $expense->description }}</td>
                                                     <td>{{ $expense->bill_amount }}</td>
                                                     <td class="no-print">
-                                                        <a href="{{ route('expense.edit', ['id' => $expense->id]) }}" style="float: left;">
+                                                        <a href="{{ route('expense.edit', $expense->id) }}" style="float: left;">
                                                             <button type="button" class="btn btn-warning"><i class="fa fa-edit"></i> Edit</button>
                                                         </a>
                                                     </td>
@@ -147,6 +164,7 @@
                                                     <td></td>
                                                     <td></td>
                                                     <td class="text-red"><b>Total Amount</b></td>
+                                                    <td></td>
                                                     <td></td>
                                                     <td></td>
                                                     <td class="text-red"><b>{{ $totalExpense }}</b></td>
