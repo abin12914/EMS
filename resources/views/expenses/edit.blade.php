@@ -28,28 +28,28 @@
                         <!-- /.box-header -->
                         <!-- form start -->
                         <form action="{{route('expense.update', $expense->id)}}" method="post" class="form-horizontal" autocomplete="off">
+                            @csrf()
+                            @method('PUT')
                             <div class="box-body">
-                                <input type="hidden" name="_token" value="{{csrf_token()}}">
-                                {{ method_field('PUT') }}
                                 <div class="row">
                                     <div class="col-md-1"></div>
                                     <div class="col-md-10">
                                         <div class="form-group">
                                             <div class="row">
                                                 <div class="col-md-6">
-                                                    <label for="date" class="control-label"><b style="color: red;">* </b> Date : </label>
-                                                    <input type="text" class="form-control decimal_number_only" name="date" id="date" placeholder="Transaction date" value="{{ !empty(old('date')) ? old('date') : $expense->date->format('d-m-Y') }}" tabindex="1">
+                                                    <label for="transaction_date" class="control-label"><b style="color: red;">* </b> Date : </label>
+                                                    <input type="text" class="form-control decimal_number_only datepicker" name="transaction_date" id="transaction_date" placeholder="Transaction date" value="{{ old('transaction_date', $expense->expense_date->format('d-m-Y')) }}" tabindex="1">
                                                     {{-- adding error_message p tag component --}}
-                                                    @component('components.paragraph.error_message', ['fieldName' => 'date'])
+                                                    @component('components.paragraph.error_message', ['fieldName' => 'transaction_date'])
                                                     @endcomponent
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <label for="supplier_account_id" class="control-label"><b style="color: red;">* </b> Supplier : </label>
+                                                    <label for="account_id" class="control-label"><b style="color: red;">* </b> Supplier : </label>
                                                     {{-- adding account select component --}}
-                                                    @component('components.selects.accounts', ['selectedAccountId' => !empty(old('supplier_account_id')) ? old('supplier_account_id') : $expense->transaction->credit_account_id, 'cashAccountFlag' => true, 'selectName' => 'supplier_account_id', 'activeFlag' => false, 'tabindex' => 2])
+                                                    @component('components.selects.accounts', ['selectedAccountId' => old('account_id', $expense->transaction->credit_account_id), 'cashAccountFlag' => true, 'selectName' => 'account_id', 'activeFlag' => false, 'tabindex' => 2])
                                                     @endcomponent
                                                     {{-- adding error_message p tag component --}}
-                                                    @component('components.paragraph.error_message', ['fieldName' => 'supplier_account_id'])
+                                                    @component('components.paragraph.error_message', ['fieldName' => 'account_id'])
                                                     @endcomponent
                                                 </div>
                                             </div>
@@ -57,34 +57,43 @@
                                         <div class="form-group">
                                             <div class="row">
                                                 <div class="col-md-6">
+                                                    <label for="excavator_id" class="control-label"><b style="color: red;">* </b> Excavator : </label>
+                                                    {{-- adding excavators select component --}}
+                                                    @component('components.selects.excavators', ['selectedExcavatorId' => old('excavator_id', $expense->excavator_id), 'selectName' => 'excavator_id', 'tabindex' => 3])
+                                                    @endcomponent
+                                                    {{-- adding error_message p tag component --}}
+                                                    @component('components.paragraph.error_message', ['fieldName' => 'excavator_id'])
+                                                    @endcomponent
+                                                </div>
+                                                <div class="col-md-6">
                                                     <label for="service_id" class="control-label"><b style="color: red;">* </b> Service : </label>
                                                     {{-- adding services select component --}}
-                                                    @component('components.selects.services', ['selectedServiceId' => !empty(old('service_id')) ? old('service_id') : $expense->service_id, 'selectName' => 'service_id', 'tabindex' => 3])
+                                                    @component('components.selects.services', ['selectedServiceId' => old('service_id', $expense->service_id), 'selectName' => 'service_id', 'tabindex' => 4])
                                                     @endcomponent
                                                     {{-- adding error_message p tag component --}}
                                                     @component('components.paragraph.error_message', ['fieldName' => 'service_id'])
                                                     @endcomponent
                                                 </div>
-                                                <div class="col-md-6">
-                                                    <label for="bill_amount" class="control-label"><b style="color: red;">* </b> Bill Amount: </label>
-                                                    <input type="text" class="form-control decimal_number_only" name="bill_amount" id="bill_amount" placeholder="Bill amount" value="{{ !empty(old('bill_amount')) ? old('bill_amount') : $expense->bill_amount }}" maxlength="8" tabindex="4">
-                                                    {{-- adding error_message p tag component --}}
-                                                    @component('components.paragraph.error_message', ['fieldName' => 'bill_amount'])
-                                                    @endcomponent
-                                                </div>
                                             </div>
                                         </div>
                                         <div class="form-group">
                                             <div class="row">
-                                                <div class="col-md-12">
+                                                <div class="col-md-6">
                                                     <label for="description" class="control-label"><b style="color: red;">* </b> Description: </label>
                                                     @if(!empty(old('description')))
                                                         <textarea class="form-control" name="description" id="description" rows="1" placeholder="Description" style="resize: none;" tabindex="5">{{ old('description') }}</textarea>
                                                     @else
-                                                        <textarea class="form-control" name="description" id="description" rows="1" placeholder="Description" style="resize: none;" tabindex="5">{{ str_replace("[Purchase & Expense]", "", $expense->transaction->particulars) }}</textarea>
+                                                        <textarea class="form-control" name="description" id="description" rows="1" placeholder="Description" style="resize: none;" tabindex="5">{{ $expense->description }}</textarea>
                                                     @endif
                                                     {{-- adding error_message p tag component --}}
                                                     @component('components.paragraph.error_message', ['fieldName' => 'description'])
+                                                    @endcomponent
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="bill_amount" class="control-label"><b style="color: red;">* </b> Bill Amount: </label>
+                                                    <input type="text" class="form-control decimal_number_only" name="bill_amount" id="bill_amount" placeholder="Bill amount" value="{{ old('bill_amount', $expense->bill_amount) }}" maxlength="8" tabindex="6">
+                                                    {{-- adding error_message p tag component --}}
+                                                    @component('components.paragraph.error_message', ['fieldName' => 'bill_amount'])
                                                     @endcomponent
                                                 </div>
                                             </div>
@@ -95,10 +104,10 @@
                                 <div class="row">
                                     <div class="col-md-3"></div>
                                     <div class="col-md-3">
-                                        <button type="reset" class="btn btn-default btn-block btn-flat" tabindex="7">Clear</button>
+                                        <button type="reset" class="btn btn-default btn-block btn-flat" tabindex="8">Clear</button>
                                     </div>
                                     <div class="col-md-3">
-                                        <button type="button" class="btn btn-warning btn-block btn-flat update_button" tabindex="6">Submit</button>
+                                        <button type="submit" class="btn btn-primary btn-block btn-flat submit-button" tabindex="7">Submit</button>
                                     </div>
                                     <!-- /.col -->
                                 </div><br>
@@ -113,7 +122,4 @@
     </section>
     <!-- /.content -->
 </div>
-@endsection
-@section('scripts')
-    <script src="/js/registrations/expenseRegistration.js?rndstr={{ rand(1000,9999) }}"></script>
 @endsection

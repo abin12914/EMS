@@ -30,7 +30,8 @@ class EmployeeWageFilterRequest extends FormRequest
                                 ],
             'to_date'       =>  [
                                     'nullable',
-                                    'date_format:d-m-Y'
+                                    'date_format:d-m-Y',
+                                    'after_or_equal:from_date'
                                 ],
             'employee_id'    =>  [
                                     'nullable',

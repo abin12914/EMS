@@ -32,6 +32,7 @@ class VoucherFilterRequest extends FormRequest
             'to_date'               =>  [
                                             'nullable',
                                             'date_format:d-m-Y',
+                                            'after_or_equal:from_date'
                                         ],
             'voucher_account_id'    =>  [
                                             'nullable',

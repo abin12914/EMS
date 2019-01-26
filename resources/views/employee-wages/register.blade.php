@@ -56,7 +56,7 @@
                                         <div class="form-group">
                                             <div class="row">
                                                 <div class="col-md-6">
-                                                    <label for="to_date" class="control-label">To Date [Use only if generating wage for multiple days] : </label>
+                                                    <label for="to_date" class="control-label">To Date [Optioanl] : </label>
                                                     <input type="text" class="form-control decimal_number_only" name="to_date" id="to_date" placeholder="To date" value="{{ old('to_date') }}" tabindex="3">
                                                     {{-- adding error_message p tag component --}}
                                                     @component('components.paragraph.error_message', ['fieldName' => 'to_date'])

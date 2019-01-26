@@ -141,8 +141,8 @@
                                                     <td>{{ $index + $expenses->firstItem() }}</td>
                                                     <td>{{ $expense->expense_date->format('d-m-Y') }}</td>
                                                     <td>{{ $expense->service->name }}</td>
-                                                    <td>{{ $expense->excavator->name }}</td>
                                                     <td>{{ $expense->transaction->creditAccount->account_name }}</td>
+                                                    <td>{{ $expense->excavator->name }}</td>
                                                     <td>{{ $expense->description }}</td>
                                                     <td>{{ $expense->bill_amount }}</td>
                                                     <td class="no-print">

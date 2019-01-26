@@ -13,7 +13,7 @@ return [
         2 => 'Supplier',
         3 => 'Customer',
         4 => 'Contractor',
-        5 => 'General',
+        5 => 'General/Other',
     ],
 
     'accountTypes' => [
@@ -29,26 +29,22 @@ return [
 
     'transactionRelations' => [
         1 => [
-            'relationName'  => 'purchase',
-            'displayName'   => 'Purchase'
-        ],
-        2 => [
             'relationName'  => 'employeeWage',
             'displayName'   => 'Employee Wage'
         ],
+        2 => [
+            'relationName'  => 'excavatorReading',
+            'displayName'   => 'Excavator Reading'
+        ],
         3 => [
-            'relationName'  => 'sale',
-            'displayName'   => 'Sale'
+            'relationName'  => 'excavatorRent',
+            'displayName'   => 'Excavator Rent'
         ],
         4 => [
-            'relationName'  => 'transportation',
-            'displayName'   => 'Transportation'
-        ],
-        5 => [
             'relationName'  => 'expense',
             'displayName'   => 'Expense'
         ],
-        6 => [
+        5 => [
             'relationName'  => 'voucher',
             'displayName'   => 'Voucher'
         ]
@@ -68,120 +64,81 @@ return [
             'status'            => 1,
         ],
 
-        'ExcavatorRent' => [
-            'id'                => 2,
-            'account_name'      => 'ExcavatorRent;', //account id : 2
-            'description'       => 'Excavator rent account',
-            'type'              => 2, //nominal account
-            'relation'          => 0, //nominal
-            'financial_status'  => 0, //none
-            'opening_balance'   => 0,
-            'name'              => 'Excavator rent account',
-            'phone'             => '0000000002',
-            'status'            => 1,  
-        ],
-
-        'Purchase' => [
-            'id'                => 3,
-            'account_name'      => 'Purchases', //account id : 3
-            'description'       => 'Purchases account',
-            'type'              => 2, //nominal account
-            'relation'          => 0, //nominal
-            'financial_status'  => 0, //none
-            'opening_balance'   => 0,
-            'name'              => 'Purchases account',
-            'phone'             => '0000000003',
-            'status'            => 1,  
-        ],
-
         'EmployeeWage' => [
-            'id'                => 4,
-            'account_name'      => 'Employee Wage', //account id : 4
+            'id'                => 2,
+            'account_name'      => 'Employee Wage', //account id : 2
             'description'       => 'Employee wage account',
             'type'              => 2, //nominal account
             'relation'          => 0, //nominal
             'financial_status'  => 0, //none
             'opening_balance'   => 0,
             'name'              => 'Employee wage account',
-            'phone'             => '0000000004',
+            'phone'             => '0000000002',
             'status'            => 1,
         ],
 
-        'EmployeeSalary' => [
-            'id'                => 5,
-            'account_name'      => 'Employee Salary', //account id : 5
-            'description'       => 'Employee salary account',
+        'ExcavatorRent' => [
+            'id'                => 3,
+            'account_name'      => 'ExcavatorRent;', //account id : 3
+            'description'       => 'Excavator rent account',
             'type'              => 2, //nominal account
             'relation'          => 0, //nominal
             'financial_status'  => 0, //none
             'opening_balance'   => 0,
-            'name'              => 'Employee salary account',
-            'phone'             => '0000000005',
-            'status'            => 1,
+            'name'              => 'Excavator rent account',
+            'phone'             => '0000000003',
+            'status'            => 1,  
         ],
 
         'ServiceAndExpense' => [
-            'id'                => 6,
-            'account_name'      => 'Service And Expenses', //account id : 6
+            'id'                => 4,
+            'account_name'      => 'Service And Expenses', //account id : 4
             'description'       => 'Service and expense account',
             'type'              => 2, //nominal account
             'relation'          => 0, //nominal
             'financial_status'  => 0, //none
             'opening_balance'   => 0,
             'name'              => 'Service and expense account',
-            'phone'             => '0000000006',
+            'phone'             => '0000000004',
             'status'            => 1,
         ],
 
         'AccountOpeningBalance' => [
-            'id'                => 7,
-            'account_name'      => 'Account Opening Balance', //account id : 7
+            'id'                => 5,
+            'account_name'      => 'Account Opening Balance', //account id : 5
             'description'       => 'Account opening balance account',
             'type'              => 2, //nominal account
             'relation'          => 0, //nominal
             'financial_status'  => 0, //none
             'opening_balance'   => 0,
             'name'              => 'Account opening balance account',
-            'phone'             => '0000000007',
+            'phone'             => '0000000005',
             'status'            => 1,
         ],
 
-        'TransportationChargeAccount' => [
-            'id'                => 8,
-            'account_name'      => 'Transportation Charge Account', //account id : 8
-            'description'       => 'Transportation charge account',
+        'Temp1' => [
+            'id'                => 6,
+            'account_name'      => 'Temp1', //account id : 6
+            'description'       => 'Temporary account 1',
             'type'              => 2, //nominal account
             'relation'          => 0, //nominal
             'financial_status'  => 0, //none
             'opening_balance'   => 0,
-            'name'              => 'Transportation charge account',
-            'phone'             => '0000000008',
-            'status'            => 1,
-        ],
-
-        'LoadingChargeAccount' => [
-            'id'                => 9,
-            'account_name'      => 'Loading Charge Account', //account id : 9
-            'description'       => 'Loading charge account',
-            'type'              => 2, //nominal account
-            'relation'          => 0, //nominal
-            'financial_status'  => 0, //none
-            'opening_balance'   => 0,
-            'name'              => 'Loading charge account',
-            'phone'             => '0000000009',
-            'status'            => 1,
+            'name'              => 'Temporary account 1',
+            'phone'             => '0000000006',
+            'status'            => 0,
         ],
 
         'Temp2' => [
-            'id'                => 10,
-            'account_name'      => 'Temp2', //account id : 10
+            'id'                => 7,
+            'account_name'      => 'Temp2', //account id : 7
             'description'       => 'Temporary account 2',
             'type'              => 2, //nominal account
             'relation'          => 0, //nominal
             'financial_status'  => 0, //none
             'opening_balance'   => 0,
-            'name'              => 'Temporary account 2',
-            'phone'             => '0000000010',
+            'name'              => 'Temporary account 7',
+            'phone'             => '0000000007',
             'status'            => 0,
         ],
     ],

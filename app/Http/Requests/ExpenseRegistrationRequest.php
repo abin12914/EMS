@@ -28,6 +28,7 @@ class ExpenseRegistrationRequest extends FormRequest
             'transaction_date'  =>  [
                                         'required',
                                         'date_format:d-m-Y',
+                                        'before_or_equal:today',
                                     ],
             'account_id'        =>  [
                                         'required',
@@ -43,7 +44,7 @@ class ExpenseRegistrationRequest extends FormRequest
                                     ],
             'description'       =>  [
                                         'required',
-                                        'min:5',
+                                        'min:4',
                                         'max:200',
                                     ],
             'bill_amount'       =>  [

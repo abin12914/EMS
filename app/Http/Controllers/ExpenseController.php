@@ -35,8 +35,8 @@ class ExpenseController extends Controller
     {
         $noOfRecordsPerPage = $request->get('no_of_records') ?? config('settings.no_of_record_per_page');
         //date format conversion
-        $fromDate    = empty($request->get('from_date')) ?: Carbon::createFromFormat('d-m-Y', $request->get('from_date'))->format('Y-m-d');
-        $toDate      = empty($request->get('to_date')) ?: Carbon::createFromFormat('d-m-Y', $request->get('to_date'))->format('Y-m-d');
+        $fromDate    = !empty($request->get('from_date')) ? Carbon::createFromFormat('d-m-Y', $request->get('from_date'))->format('Y-m-d') : null;
+        $toDate      = !empty($request->get('to_date')) ? Carbon::createFromFormat('d-m-Y', $request->get('to_date'))->format('Y-m-d') : null;
 
         $whereParams = [
             'from_date' => [
@@ -69,14 +69,18 @@ class ExpenseController extends Controller
                 'paramValue'    => $request->get('account_id'),
             ]
         ];
+
+        $expenses = $this->expenseRepo->getExpenses($whereParams, [], $relationalParams, ['by' => 'id', 'order' => 'asc', 'num' => $noOfRecordsPerPage], [], [], true);
+        $totalExpense = $this->expenseRepo->getExpenses($whereParams, [], $relationalParams, [], ['key' => 'sum', 'value' => 'bill_amount'], [], true);
+
         //params passing for auto selection
         $whereParams['from_date']['paramValue'] = $request->get('from_date');
         $whereParams['to_date']['paramValue']   = $request->get('to_date');
         
         //getExpenses($whereParams=[],$orWhereParams=[],$relationalParams=[],$orderBy=['by' => 'id', 'order' => 'asc', 'num' => null], $withParams=[],$activeFlag=true)
         return view('expenses.list', [
-            'expenses'     => $this->expenseRepo->getExpenses($whereParams, [], $relationalParams, ['by' => 'id', 'order' => 'asc', 'num' => $noOfRecordsPerPage], [], [], true),
-            'totalExpense' => $this->expenseRepo->getExpenses($whereParams, [], $relationalParams, [], ['key' => 'sum', 'value' => 'bill_amount'], [], true),
+            'expenses'     => $expenses,
+            'totalExpense' => $totalExpense,
             'params'       => array_merge($whereParams, $relationalParams),
             'noOfRecords'  => $noOfRecordsPerPage,
         ]);
@@ -125,7 +129,7 @@ class ExpenseController extends Controller
             //save expense transaction to table
             $transactionResponse   = $transactionRepo->saveTransaction([
                 'debit_account_id'  => $expenseAccountId, // debit the expense account
-                'credit_account_id' => $request->get('supplier_account_id'), // credit the supplier
+                'credit_account_id' => $request->get('account_id'), // credit the supplier
                 'amount'            => $totalBill,
                 'transaction_date'  => $transactionDate,
                 'particulars'       => $request->get('description')."[Purchase & Expense]",
@@ -143,6 +147,7 @@ class ExpenseController extends Controller
                 'expense_date'   => $transactionDate,
                 'excavator_id'   => $request->get('excavator_id'),
                 'service_id'     => $request->get('service_id'),
+                'description'    => $request->get('description'),
                 'bill_amount'    => $totalBill,
                 'status'         => 1,
                 'created_by'     => $user->id,
@@ -166,7 +171,7 @@ class ExpenseController extends Controller
         } catch (Exception $e) {
             //roll back in case of exceptions
             DB::rollback();
-dd($e);
+
             $errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : 1);
         }
         if(!empty($id)) {
@@ -243,7 +248,7 @@ dd($e);
         $updateResponse = $this->store($request, $transactionRepo, $accountRepo, $id);
 
         if($updateResponse['flag']) {
-            return redirect(route('expenses.show', $updateResponse['expenses']->id))->with("message","Expenses details updated successfully. Updated Record Number : ". $updateResponse['expenses']->id)->with("alert-class", "success");
+            return redirect(route('expense.index'))->with("message","Expenses details updated successfully. Updated Record Number : ". $updateResponse['expense']->id)->with("alert-class", "success");
         }
         
         return redirect()->back()->with("message","Failed to update the expenses details. Error Code : ". $this->errorHead. "/". $updateResponse['errorCode'])->with("alert-class", "error");
