@@ -44,7 +44,7 @@
                                             @endcomponent
                                         </div>
                                         <div class="col-md-4">
-                                            <label for="account_id" class="control-label">Supplier : </label>
+                                            <label for="account_id" class="control-label">Account : </label>
                                             {{-- adding account select component --}}
                                             @component('components.selects.accounts', ['selectedAccountId' => $params['voucher_account_id']['paramValue'], 'cashAccountFlag' => true, 'selectName' => 'voucher_account_id', 'activeFlag' => false, 'tabindex' => 5])
                                             @endcomponent
@@ -123,12 +123,14 @@
                                     <thead>
                                         <tr>
                                             <th style="width: 5%;">#</th>
-                                            <th style="width: 15%;">Date</th>
-                                            <th style="width: 25%;">Account</th>
-                                            <th style="width: 15%;">Voucher Type</th>
-                                            <th style="width: 15%;">Cash Debit</th>
-                                            <th style="width: 15%;">Cash Credit</th>
-                                            <th style="width: 10%;" class="no-print">Details</th>
+                                            <th style="width: 10%;">Date</th>
+                                            <th style="width: 15%;">Account</th>
+                                            <th style="width: 10%;">Voucher Type</th>
+                                            <th style="width: 26%;">Description</th>
+                                            <th style="width: 12%;">Cash Debit</th>
+                                            <th style="width: 12%;">Cash Credit</th>
+                                            <th style="width: 5%;" class="no-print">Edit</th>
+                                            <th style="width: 5%;" class="no-print">Delete</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -137,21 +139,30 @@
                                                 <tr>
                                                     <td>{{ $index + $vouchers->firstItem() }}</td>
                                                     <td>{{ $voucher->transaction_date->format('d-m-Y') }}</td>
-                                                    @if($voucher->voucher_type == 1)
+                                                    @if($voucher->transaction_type == 1)
                                                         <td>{{ $voucher->transaction->creditAccount->account_name }}</td>
                                                         <td>Receipt</td>
+                                                        <td>{{ $voucher->description }}</td>
                                                         <td>{{ $voucher->amount }}</td>
                                                         <td></td>
                                                     @else
                                                         <td>{{ $voucher->transaction->debitAccount->account_name }}</td>
                                                         <td>Payment</td>
+                                                        <td>{{ $voucher->description }}</td>
                                                         <td></td>
                                                         <td>{{ $voucher->amount }}</td>
                                                     @endif
                                                     <td class="no-print">
-                                                        <a href="{{ route('voucher.show', ['id' => $voucher->id]) }}">
-                                                            <button type="button" class="btn btn-info">Details</button>
+                                                        <a href="{{ route('voucher.edit', $voucher->id) }}" style="float: left;">
+                                                            <button type="button" class="btn btn-warning"><i class="fa fa-edit"></i> Edit</button>
                                                         </a>
+                                                    </td>
+                                                    <td class="no-print">
+                                                        <form action="{{ route('voucher.destroy', $voucher->id) }}" method="post" class="form-horizontal">
+                                                            {{ method_field('DELETE') }}
+                                                            {{ csrf_field() }}
+                                                            <button type="button" class="btn btn-danger delete_button"><i class="fa fa-trash"></i> Delete</button>
+                                                        </form>
                                                     </td>
                                                 </tr>
                                             @endforeach
