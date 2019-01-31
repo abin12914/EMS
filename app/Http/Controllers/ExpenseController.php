@@ -191,7 +191,6 @@ class ExpenseController extends Controller
      */
     public function show($id)
     {
-        $errorCode  = 0;
         $expense    = [];
 
         try {
@@ -216,7 +215,6 @@ class ExpenseController extends Controller
      */
     public function edit($id)
     {
-        $errorCode  = 0;
         $expense    = [];
 
         try {

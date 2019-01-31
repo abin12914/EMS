@@ -63,12 +63,12 @@
                                         <div class="form-group">
                                             <div class="row">
                                                 <div class="col-md-6">
-                                                    <label for="transaction_type_debit" class="control-label"><b style="color: red;">* </b> <b id="account_label">{{ (empty(old('transaction_type')) || old('transaction_type') == 1) ? "Giver " : "Reciever " }}</b> Account : </label>
+                                                    <label for="account_id" class="control-label"><b style="color: red;">* </b> <b id="account_label">{{ (empty(old('transaction_type')) || old('transaction_type') == 1) ? "Giver " : "Reciever " }}</b> Account : </label>
                                                     {{-- adding account select component --}}
-                                                    @component('components.selects.accounts', ['selectedAccountId' => old('voucher_account_id'), 'cashAccountFlag' => false, 'selectName' => 'voucher_account_id', 'activeFlag' => false, 'tabindex' => 3])
+                                                    @component('components.selects.accounts', ['selectedAccountId' => old('account_id'), 'cashAccountFlag' => false, 'selectName' => 'account_id', 'activeFlag' => false, 'tabindex' => 3])
                                                     @endcomponent
                                                     {{-- adding error_message p tag component --}}
-                                                    @component('components.paragraph.error_message', ['fieldName' => 'voucher_account_id'])
+                                                    @component('components.paragraph.error_message', ['fieldName' => 'account_id'])
                                                     @endcomponent
                                                 </div>
                                                 <div class="col-md-6">

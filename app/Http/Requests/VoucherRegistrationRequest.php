@@ -26,29 +26,29 @@ class VoucherRegistrationRequest extends FormRequest
     public function rules()
     {
         return [
-            'transaction_type'          =>  [
-                                            'required',
-                                            Rule::in([1, 2]),
-                                        ],
-            'voucher_account_id'    =>  [
-                                            'required',
-                                            'exists:accounts,id',
-                                        ],
-            'transaction_date'      =>  [
-                                            'required',
-                                            'date_format:d-m-Y',
-                                        ],
-            'description'           =>  [
-                                            'required',
-                                            'min:4',
-                                            'max:200',
-                                        ],
-            'amount'                =>  [
-                                            'required',
-                                            'numeric',
-                                            'min:10',
-                                            'max:999999',
-                                        ],
+            'transaction_type'  =>  [
+                                        'required',
+                                        Rule::in([1, 2]),
+                                    ],
+            'account_id'        =>  [
+                                        'required',
+                                        'exists:accounts,id',
+                                    ],
+            'transaction_date'  =>  [
+                                        'required',
+                                        'date_format:d-m-Y',
+                                    ],
+            'description'       =>  [
+                                        'required',
+                                        'min:4',
+                                        'max:200',
+                                    ],
+            'amount'            =>  [
+                                        'required',
+                                        'numeric',
+                                        'min:10',
+                                        'max:999999',
+                                    ],
         ];
     }
 }

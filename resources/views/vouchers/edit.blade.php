@@ -36,27 +36,27 @@
                                         <div class="form-group">
                                             <div class="row">
                                                 <div class="col-md-6">
-                                                    <label for="voucher_type_debit" class="control-label"><b style="color: red;">* </b> Receipt : </label>
+                                                    <label for="transaction_type_debit" class="control-label"><b style="color: red;">* </b> Receipt : </label>
                                                     <div class="input-group" title="Debit">
                                                         <span class="input-group-addon">
-                                                            <input type="radio" name="voucher_type" class="voucher_type" id="voucher_type_debit" value="1" {{ (empty(old('voucher_type')) && $voucher->voucher_type == 1) || old('voucher_type') == '1'  ? 'checked' : ''}} tabindex="1">
+                                                            <input type="radio" name="transaction_type" class="transaction_type" id="transaction_type_debit" value="1" {{ (empty(old('transaction_type')) && $voucher->transaction_type == 1) || old('transaction_type') == '1'  ? 'checked' : ''}} tabindex="1">
                                                         </span>
-                                                        <label for="voucher_type_debit" class="form-control">Receipt [Cash Received]</label>
+                                                        <label for="transaction_type_debit" class="form-control">Receipt [Cash Received]</label>
                                                     </div>
                                                     {{-- adding error_message p tag component --}}
-                                                    @component('components.paragraph.error_message', ['fieldName' => 'voucher_type'])
+                                                    @component('components.paragraph.error_message', ['fieldName' => 'transaction_type'])
                                                     @endcomponent
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <label for="voucher_type_credit" class="control-label"><b style="color: red;">* </b> Payment : </label>
+                                                    <label for="transaction_type_credit" class="control-label"><b style="color: red;">* </b> Payment : </label>
                                                     <div class="input-group" title="Credit">
                                                         <span class="input-group-addon">
-                                                            <input type="radio" name="voucher_type" class="voucher_type" id="voucher_type_credit" value="2" {{ (empty(old('voucher_type')) && $voucher->voucher_type == 2) || old('voucher_type') == '2'  ? 'checked' : ''}} tabindex="2">
+                                                            <input type="radio" name="transaction_type" class="transaction_type" id="transaction_type_credit" value="2" {{ (empty(old('transaction_type')) && $voucher->transaction_type == 2) || old('transaction_type') == '2'  ? 'checked' : ''}} tabindex="2">
                                                         </span>
-                                                        <label for="voucher_type_credit" class="form-control">Payment [Cash Paid]</label>
+                                                        <label for="transaction_type_credit" class="form-control">Payment [Cash Paid]</label>
                                                     </div>
                                                     {{-- adding error_message p tag component --}}
-                                                    @component('components.paragraph.error_message', ['fieldName' => 'voucher_type'])
+                                                    @component('components.paragraph.error_message', ['fieldName' => 'transaction_type'])
                                                     @endcomponent
                                                 </div>
                                             </div>
@@ -64,19 +64,19 @@
                                         <div class="form-group">
                                             <div class="row">
                                                 <div class="col-md-6">
-                                                    <label for="voucher_type_debit" class="control-label"><b style="color: red;">* </b> <b id="account_label">{{ ((empty(old('voucher_type')) && $voucher->voucher_type == 1) || old('voucher_type') == 1) ? "Giver " : "Reciever " }}</b>- Account : </label>
+                                                    <label for="account_id" class="control-label"><b style="color: red;">* </b> <b id="account_label">{{ ((empty(old('transaction_type')) && $voucher->transaction_type == 1) || old('transaction_type') == 1) ? "Giver " : "Reciever " }}</b>- Account : </label>
                                                     {{-- adding account select component --}}
-                                                    @component('components.selects.accounts', ['selectedAccountId' => !empty(old('voucher_account_id')) ? old('voucher_account_id') : ($voucher->voucher_type == 1 ? $voucher->transaction->credit_account_id : $voucher->transaction->debit_account_id), 'cashAccountFlag' => false, 'selectName' => 'voucher_account_id', 'activeFlag' => false, 'tabindex' => 3])
+                                                    @component('components.selects.accounts', ['selectedAccountId' => !empty(old('account_id')) ? old('account_id') : ($voucher->transaction_type == 1 ? $voucher->transaction->credit_account_id : $voucher->transaction->debit_account_id), 'cashAccountFlag' => false, 'selectName' => 'account_id', 'activeFlag' => false, 'tabindex' => 3])
                                                     @endcomponent
                                                     {{-- adding error_message p tag component --}}
-                                                    @component('components.paragraph.error_message', ['fieldName' => 'voucher_account_id'])
+                                                    @component('components.paragraph.error_message', ['fieldName' => 'account_id'])
                                                     @endcomponent
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <label for="date" class="control-label"><b style="color: red;">* </b> Date : </label>
-                                                    <input type="text" class="form-control decimal_number_only datepicker" name="date" id="date" placeholder="Transaction date" value="{{ !empty(old('date')) ? old('date') : $voucher->date->format('d-m-Y') }}" tabindex="4">
+                                                    <label for="transaction_date" class="control-label"><b style="color: red;">* </b> Date : </label>
+                                                    <input type="text" class="form-control decimal_number_only datepicker_edit" name="transaction_date" id="transaction_date" placeholder="Transaction date" value="{{ !empty(old('transaction_date')) ? old('transaction_date') : $voucher->transaction_date->format('d-m-Y') }}" tabindex="4">
                                                     {{-- adding error_message p tag component --}}
-                                                    @component('components.paragraph.error_message', ['fieldName' => 'date'])
+                                                    @component('components.paragraph.error_message', ['fieldName' => 'transaction_date'])
                                                     @endcomponent
                                                 </div>
                                             </div>
@@ -85,7 +85,7 @@
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <label for="description" class="control-label"><b style="color: red;">* </b>Description : </label>
-                                                    <textarea class="form-control" name="description" id="description" rows="1" placeholder="Description" style="resize: none;" tabindex="5">{{ !empty(old('description')) ? old('description') : (preg_replace('#\s*\[.+\]\s*#U', '', $voucher->transaction->particulars)) }}</textarea>
+                                                    <textarea class="form-control" name="description" id="description" rows="1" placeholder="Description" style="resize: none;" tabindex="5">{{ !empty(old('description')) ? old('description') : $voucher->description }}</textarea>
                                                     {{-- adding error_message p tag component --}}
                                                     @component('components.paragraph.error_message', ['fieldName' => 'description'])
                                                     @endcomponent
@@ -108,7 +108,7 @@
                                         <button type="reset" class="btn btn-default btn-block btn-flat" tabindex="8">Clear</button>
                                     </div>
                                     <div class="col-md-3">
-                                        <button type="button" class="btn btn-warning btn-block btn-flat update_button" tabindex="7">Submit</button>
+                                        <button type="button" class="btn btn-warning btn-block btn-flat update_button" tabindex="7">Update</button>
                                     </div>
                                     <!-- /.col -->
                                 </div><br>

@@ -43,11 +43,39 @@ class VoucherRepository extends Repository
             return (!empty($aggregates['key']) ? parent::aggregatesSwitch($vouchers, $aggregates) : parent::getFilter($vouchers, $orderBy));
         } catch (Exception $e) {
             $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 1);
-dd($e);
+
             throw new AppCustomException("CustomError", $this->errorCode);
         }
 
         return $vouchers;
+    }
+
+    /**
+     * Return trucks.
+     */
+    public function getVoucher($id, $withParams=[], $activeFlag=true)
+    {
+        $voucher = [];
+
+        try {
+            if(empty($withParams)) {
+                $voucher = Voucher::query();
+            } else {
+                $voucher = Voucher::with($withParams);
+            }
+
+            if($activeFlag) {
+                $voucher = $voucher->active();
+            }
+
+            $voucher = $voucher->findOrFail($id);
+        } catch (Exception $e) {
+            $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 4);
+
+            throw new AppCustomException("CustomError", $this->errorCode);
+        }
+
+        return $voucher;
     }
 
     /**
@@ -70,8 +98,8 @@ dd($e);
                 'voucher' => $voucher,
             ];
         } catch (Exception $e) {
-            $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 2);
-dd($e);
+            $this->errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : $this->repositoryCode + 3);
+
             throw new AppCustomException("CustomError", $this->errorCode);
         }
 
@@ -82,62 +110,26 @@ dd($e);
     }
 
     /**
-     * Return trucks.
-     */
-    public function getVoucher($id)
-    {
-        $voucher = [];
-
-        try {
-            $voucher = Voucher::active()->findOrFail($id);
-        } catch (Exception $e) {
-            if($e->getMessage() == "CustomError") {
-                $this->errorCode = $e->getCode();
-            } else {
-                $this->errorCode = $this->repositoryCode + 4;
-            }
-            
-            throw new AppCustomException("CustomError", $this->errorCode);
-        }
-
-        return $voucher;
-    }
-
-    /**
      * delete voucher.
      */
     public function deleteVoucher($id, $forceFlag=false)
-    {   
-        $deleteFlag = false;
-
+    {
         try {
             //get voucher
-            $voucher = $this->getVoucher($id);
+            $voucher = $this->getVoucher($id, [], false);
 
             //force delete or soft delete
             //related models will be deleted by deleting event handlers
-            if($forceFlag) {
-                $voucher->forceDelete();
-            } else {
-                $voucher->delete();
-            }
-            
-            $deleteFlag = true;
-        } catch (Exception $e) {
-            if($e->getMessage() == "CustomError") {
-                $this->errorCode = $e->getCode();
-            } else {
-                $this->errorCode = $this->repositoryCode + 5;
-            }
-            
-            throw new AppCustomException("CustomError", $this->errorCode);
-        }
+            $forceFlag ? $voucher->forceDelete() : $voucher->delete();
 
-        if($deleteFlag) {
             return [
                 'flag'  => true,
                 'force' => $forceFlag,
             ];
+        } catch (Exception $e) {
+            $this->errorCode = (($e->getMessage() == "CustomError") ?  $e->getCode() : $this->repositoryCode + 5);
+            
+            throw new AppCustomException("CustomError", $this->errorCode);
         }
 
         return [

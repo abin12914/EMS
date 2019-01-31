@@ -46,10 +46,10 @@
                                         <div class="col-md-4">
                                             <label for="account_id" class="control-label">Account : </label>
                                             {{-- adding account select component --}}
-                                            @component('components.selects.accounts', ['selectedAccountId' => $params['voucher_account_id']['paramValue'], 'cashAccountFlag' => true, 'selectName' => 'voucher_account_id', 'activeFlag' => false, 'tabindex' => 5])
+                                            @component('components.selects.accounts', ['selectedAccountId' => $params['account_id']['paramValue'], 'cashAccountFlag' => false, 'selectName' => 'account_id', 'activeFlag' => false, 'tabindex' => 5])
                                             @endcomponent
                                             {{-- adding error_message p tag component --}}
-                                            @component('components.paragraph.error_message', ['fieldName' => 'voucher_account_id'])
+                                            @component('components.paragraph.error_message', ['fieldName' => 'account_id'])
                                             @endcomponent
                                         </div>
                                     </div>
@@ -58,21 +58,21 @@
                                             <label class="control-label"><b style="color: red;">* </b> Voucher Type : </label>
                                             <div class="input-group">
                                                 <span class="input-group-addon">
-                                                    <input type="checkbox" name="voucher_type[]" id="voucher_type_debit" value="1" {{ empty($params['voucher_type']['paramValue']) || in_array(1, $params['voucher_type']['paramValue']) ? 'checked' : ''}} tabindex="4">
+                                                    <input type="checkbox" name="transaction_type[]" id="transaction_type_debit" value="1" {{ empty($params['transaction_type']['paramValue']) || in_array(1, $params['transaction_type']['paramValue']) ? 'checked' : ''}} tabindex="4">
                                                 </span>
-                                                <label for="voucher_type_debit" class="form-control">Debit / Reciept</label>
+                                                <label for="transaction_type_debit" class="form-control">Debit / Reciept</label>
                                             </div>
                                             {{-- adding error_message p tag component --}}
-                                            @component('components.paragraph.error_message', ['fieldName' => 'voucher_type'])
+                                            @component('components.paragraph.error_message', ['fieldName' => 'transaction_type'])
                                             @endcomponent
                                         </div>
                                         <div class="col-md-4">
                                             <label class="control-label"><b style="color: red;">* </b> Voucher Type : </label>
                                             <div class="input-group">
                                                 <span class="input-group-addon">
-                                                    <input type="checkbox" name="voucher_type[]" id="voucher_type_credit" value="2"  {{ empty($params['voucher_type']['paramValue']) || in_array(2, $params['voucher_type']['paramValue']) ? 'checked' : ''}} tabindex="5">
+                                                    <input type="checkbox" name="transaction_type[]" id="transaction_type_credit" value="2"  {{ empty($params['transaction_type']['paramValue']) || in_array(2, $params['transaction_type']['paramValue']) ? 'checked' : ''}} tabindex="5">
                                                 </span>
-                                                <label for="voucher_type_credit" class="form-control">Credit / Payment</label>
+                                                <label for="transaction_type_credit" class="form-control">Credit / Payment</label>
                                             </div>
                                         </div>
                                         <div class="col-md-4">
@@ -172,8 +172,10 @@
                                                     <td></td>
                                                     <td class="text-red"><b>Total Amount</b></td>
                                                     <td></td>
+                                                    <td></td>
                                                     <td class="text-red"><b>{{ $totalDebitAmount }}</b></td>
                                                     <td class="text-red"><b>{{ $totalCreditAmount }}</b></td>
+                                                    <td class="no-print"></td>
                                                     <td class="no-print"></td>
                                                 </tr>
                                             @endif

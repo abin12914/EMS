@@ -33,7 +33,11 @@ class VoucherController extends Controller
      */
     public function index(VoucherFilterRequest $request)
     {
+        $totalDebitAmount   = 0;
+        $totalCreditAmount  = 0;
+
         $noOfRecordsPerPage = $request->get('no_of_records') ?? config('settings.no_of_record_per_page');
+        $transactionType    = $request->get('transaction_type');
 
         $fromDate = !empty($request->get('from_date')) ? Carbon::createFromFormat('d-m-Y', $request->get('from_date'))->format('Y-m-d') : "";
         $toDate   = !empty($request->get('to_date')) ? Carbon::createFromFormat('d-m-Y', $request->get('to_date'))->format('Y-m-d') : "";
@@ -55,7 +59,7 @@ class VoucherController extends Controller
             'transaction_type'  =>  [
                 'paramName'     => 'transaction_type',
                 'paramOperator' => '=',
-                'paramValue'    => $request->get('transaction_type'),
+                'paramValue'    => $transactionType,
             ]
         ];
 
@@ -81,18 +85,18 @@ class VoucherController extends Controller
         }
 
         $relationalOrParams = [
-            'voucher_account_id'    =>  [
+            'account_id'    =>  [
                 'relation' => 'transaction',
                 'params'   => [
                     'debit_account_id' => [
                         'paramName'     => 'debit_account_id',
                         'paramOperator' => '=',
-                        'paramValue'    => $request->get('voucher_account_id'),
+                        'paramValue'    => $request->get('account_id'),
                     ],
                     'credit_account_id' => [
                         'paramName'     => 'credit_account_id',
                         'paramOperator' => '=',
-                        'paramValue'    => $request->get('voucher_account_id'),
+                        'paramValue'    => $request->get('account_id'),
                     ],
                 ]
             ]
@@ -100,21 +104,25 @@ class VoucherController extends Controller
 
         //getVouchers($whereParams=[],$orWhereParams=[],$relationalOrParams=[],$orderBy=['by' => 'id', 'order' => 'asc', 'num' => null],$aggregates=['key' => null, 'value' => null],$withParams=[],$activeFlag=true)
         $vouchers = $this->voucherRepo->getVouchers($whereParams, [], $relationalOrParams, ['by' => 'id', 'order' => 'asc', 'num' => $noOfRecordsPerPage], [], [], true);
-        $totalDebitAmount = $this->voucherRepo->getVouchers((array_merge($dateWhere, $debitVoucherTypeWhere)), [], $relationalOrParams, ['by' => 'id', 'order' => 'asc', 'num' => $noOfRecordsPerPage], ['key' => 'sum', 'value' => 'amount'], [], true);
-        $totalCreditAmount = $this->voucherRepo->getVouchers((array_merge($dateWhere, $creditVoucherTypeWhere)), [], $relationalOrParams, ['by' => 'id', 'order' => 'asc', 'num' => $noOfRecordsPerPage], ['key' => 'sum', 'value' => 'amount'], [], true);
+        if(empty($transactionType) || in_array(1, $transactionType)) {
+            $totalDebitAmount = $this->voucherRepo->getVouchers((array_merge($dateWhere, $debitVoucherTypeWhere)), [], $relationalOrParams, ['by' => 'id', 'order' => 'asc', 'num' => $noOfRecordsPerPage], ['key' => 'sum', 'value' => 'amount'], [], true);
+        }
+        if(empty($transactionType) || in_array(2, $transactionType)) {
+            $totalCreditAmount = $this->voucherRepo->getVouchers((array_merge($dateWhere, $creditVoucherTypeWhere)), [], $relationalOrParams, ['by' => 'id', 'order' => 'asc', 'num' => $noOfRecordsPerPage], ['key' => 'sum', 'value' => 'amount'], [], true);
+        }
 
         //params passing for auto selection
         $params['from_date']['paramValue']          = $request->get('from_date');
         $params['to_date']['paramValue']            = $request->get('to_date');
         $params['transaction_type']['paramValue']   = $request->get('transaction_type');
-        $params['voucher_account_id']['paramValue'] = $request->get('voucher_account_id');
+        $params['account_id']['paramValue']         = $request->get('account_id');
 
         return view('vouchers.list', [
             'vouchers'          => $vouchers,
-            'params'            => $params,
-            'noOfRecords'       => $noOfRecordsPerPage,
             'totalDebitAmount'  => $totalDebitAmount,
             'totalCreditAmount' => $totalCreditAmount,
+            'params'            => $params,
+            'noOfRecords'       => $noOfRecordsPerPage,
         ]);
     }
 
@@ -142,12 +150,12 @@ class VoucherController extends Controller
     ) {
         $errorCode          = 0;
         $voucher            = null;
-
         $cashAccountId      = config('constants.accountConstants.Cash.id');
+
         $transactionDate    = Carbon::createFromFormat('d-m-Y', $request->get('transaction_date'))->format('Y-m-d');
         $voucherType        = $request->get('transaction_type');
         $voucherTitle       = $voucherType == 1 ? "Reciept" : "Payemnt";
-        $accountId          = $request->get('voucher_account_id');
+        $accountId          = $request->get('account_id');
         $description        = $request->get('description');
         $amount             = $request->get('amount');
 
@@ -156,12 +164,13 @@ class VoucherController extends Controller
         try {
             $user = Auth::user();
 
-            if(!empty($id)) {
-                $voucher = $this->voucherRepo->getVoucher($id);
-            }
             //confirming account exist-ency.
             $cashAccount = $accountRepo->getAccount($cashAccountId, [], false);
             $account     = $accountRepo->getAccount($accountId, [], false);
+
+            if(!empty($id)) {
+                $voucher = $this->voucherRepo->getVoucher($id, [], false);
+            }
 
             if($voucherType == 1) {
                 //Receipt : Debit cash account - Credit giver account
@@ -195,6 +204,7 @@ class VoucherController extends Controller
                 'transaction_id'    => $transactionResponse['transaction']->id,
                 'transaction_date'  => $transactionDate,
                 'transaction_type'  => $voucherType,
+                'description'       => $request->get('description'),
                 'amount'            => $amount,
                 'status'            => 1,
                 'created_by'        => $user->id,
@@ -206,17 +216,18 @@ class VoucherController extends Controller
             }
 
             DB::commit();
+            
             if(!empty($id)) {
                 return [
-                    'flag'  => true,
-                    'id'    => $voucherResponse['voucher']
+                    'flag'    => true,
+                    'voucher' => $voucherResponse['voucher']
                 ];
             }
-            return redirect(route('voucher.show', $voucherResponse['voucher']->id))->with("message", $voucherTitle. " details saved successfully. Reference Number : ". $transactionResponse['transaction']->id)->with("alert-class", "success");
+            return redirect(route('voucher.index'))->with("message", $voucherTitle. " details saved successfully. Reference Number : ". $transactionResponse['transaction']->id)->with("alert-class", "success");
         } catch (Exception $e) {
             //roll back in case of exceptions
             DB::rollback();
-dd($e);
+
             $errorCode = (($e->getMessage() == "CustomError") ? $e->getCode() : 1);
         }
         if(!empty($id)) {
@@ -291,7 +302,7 @@ dd($e);
         $updateResponse = $this->store($request, $transactionRepo, $accountRepo, $id);
 
         if($updateResponse['flag']) {
-            return redirect(route('voucher.show', $updateResponse['voucher']->id))->with("message","Voucher details updated successfully. Updated Record Number : ". $updateResponse['voucher']->id)->with("alert-class", "success");
+            return redirect(route('voucher.index'))->with("message","Voucher details updated successfully. Updated Record Number : ". $updateResponse['voucher']->id)->with("alert-class", "success");
         }
         
         return redirect()->back()->with("message","Failed to update the voucher details. Error Code : ". $this->errorHead. "/". $updateResponse['errorCode'])->with("alert-class", "error");
