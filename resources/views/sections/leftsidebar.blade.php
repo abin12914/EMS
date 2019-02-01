@@ -148,6 +148,27 @@
                             </li>
                         </ul>
                     </li>
+                    <li class="treeview {{ Request::is('site/*') || Request::is('site')? 'active' : '' }}">
+                        <a href="#">
+                            <i class="fa fa-map"></i>
+                            <span>Site</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li class="{{ Request::is('site/create')? 'active' : '' }}">
+                                <a href="{{route('site.create') }}">
+                                    <i class="fa fa-circle-o text-yellow"></i> Register
+                                </a>
+                            </li>
+                            <li class="{{ Request::is('site')? 'active' : '' }}">
+                                <a href="{{route('site.index') }}">
+                                    <i class="fa fa-circle-o text-aqua"></i> List
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                     <li class="treeview {{ Request::is('account/*') || Request::is('account') ? 'active' : '' }}">
                         <a href="#">
                             <i class="fa fa-book"></i>
