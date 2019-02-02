@@ -27,6 +27,13 @@ return [
         2 => 'Per Day',
     ],
 
+    'siteTypes' => [
+        1 => 'Quarry',
+        2 => 'Earth Movement Area',
+        3 => 'Residential Area',
+        4 => 'Construction Area'
+    ],
+
     'transactionRelations' => [
         1 => [
             'relationName'  => 'employeeWage',

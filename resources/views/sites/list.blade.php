@@ -14,6 +14,71 @@
     </section>
     <!-- Main content -->
     <section class="content">
+        <!-- Main row -->
+        <div class="row  no-print">
+            <div class="col-md-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">Filter List</h3>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-header">
+                        <form action="{{ route('site.index') }}" method="get" class="form-horizontal" autocomplete="off">
+                            <div class="row">
+                                <div class="col-md-1"></div>
+                                <div class="col-md-10">
+                                    <div class="form-group">
+                                        <div class="col-md-4">
+                                            <label for="site_type" class="control-label">Site Type : </label>
+                                            <select class="form-control select2" name="site_type" id="site_type" style="width: 100%" tabindex="1">
+                                                <option value="">Select site type</option>
+                                                @if(!empty($siteTypes) && (count($siteTypes) > 0))
+                                                    @foreach($siteTypes as $key => $siteType)
+                                                        <option value="{{ $key }}" {{ (old('site_type') == $key || $params['site_type']['paramValue'] == $key) ? 'selected' : '' }}>{{ $siteType }}</option>
+                                                    @endforeach
+                                                @endif
+                                            </select>
+                                            {{-- adding error_message p tag component --}}
+                                            @component('components.paragraph.error_message', ['fieldName' => 'site_type'])
+                                            @endcomponent
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="site_id" class="control-label">Site : </label>
+                                            {{-- adding site select component --}}
+                                            @component('components.selects.sites', ['selectedSiteId' => $params['site_id']['paramValue'], 'selectName' => 'site_id', 'tabindex' => 2])
+                                            @endcomponent
+                                            {{-- adding error_message p tag component --}}
+                                            @component('components.paragraph.error_message', ['fieldName' => 'site_id'])
+                                            @endcomponent
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="no_of_records" class="control-label">No Of Records Per Page : </label>
+                                            {{-- adding no of records text component --}}
+                                            @component('components.texts.no-of-records-text', ['noOfRecords' => $noOfRecords, 'tabindex' => 3])
+                                            @endcomponent
+                                            {{-- adding error_message p tag component --}}
+                                            @component('components.paragraph.error_message', ['fieldName' => 'no_of_records'])
+                                            @endcomponent
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="clearfix"></div><br>
+                            <div class="row">
+                                <div class="col-md-4"></div>
+                                <div class="col-md-2">
+                                    <button type="reset" class="btn btn-default btn-block btn-flat"  value="reset" tabindex="5">Clear</button>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="submit" class="btn btn-primary btn-block btn-flat submit-button" tabindex="4"><i class="fa fa-search"></i> Search</button>
+                                </div>
+                            </div>
+                        </form>
+                        <!-- /.form end -->
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="row">
             <div class="col-md-12">
                 <div class="box">
@@ -28,25 +93,23 @@
                                         <tr>
                                             <th style="width: 5%;">#</th>
                                             <th style="width: 20%;">Name</th>
-                                            <th style="width: 20%;">Description</th>
-                                            <th style="width: 20%;">Maker & Capacity</th>
-                                            <th style="width: 15%;">Bucket Rate</th>
-                                            <th style="width: 15%;">Breaker Rate</th>
+                                            <th style="width: 20%;">Place</th>
+                                            <th style="width: 30%;">Address</th>
+                                            <th style="width: 20%;">Site Type</th>
                                             <th style="width: 5%;" class="no-print">Edit</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @if(!empty($excavators))
-                                            @foreach($excavators as $index => $excavator)
+                                        @if(!empty($sites))
+                                            @foreach($sites as $index => $site)
                                                 <tr>
-                                                    <td>{{ $index + $excavators->firstItem() }}</td>
-                                                    <td>{{ $excavator->name }}</td>
-                                                    <td>{{ $excavator->description }}</td>
-                                                    <td>{{ $excavator->maker. " : ". $excavator->capacity }}</td>
-                                                    <td>{{ $excavator->bucket_rate }}</td>
-                                                    <td>{{ $excavator->breaker_rate }}</td>
+                                                    <td>{{ $index + $sites->firstItem() }}</td>
+                                                    <td>{{ $site->name }}</td>
+                                                    <td>{{ $site->place }}</td>
+                                                    <td>{{ $site->address }}</td>
+                                                    <td>{{ $siteTypes[$site->site_type] }}</td>
                                                     <td class="no-print">
-                                                        <a href="{{ route('excavator.edit', ['id' => $excavator->id]) }}" style="float: left;">
+                                                        <a href="{{ route('site.edit', ['id' => $site->id]) }}" style="float: left;">
                                                             <button type="button" class="btn btn-warning"><i class="fa fa-edit"></i> Edit</button>
                                                         </a>
                                                     </td>
@@ -59,12 +122,12 @@
                         </div>
                         <div class="row">
                             <div class="col-md-12">
-                                @if(!empty($excavators))
+                                @if(!empty($sites))
                                     <div>
-                                        Showing {{ $excavators->firstItem(). " - ". $excavators->lastItem(). " of ". $excavators->total() }}<br>
+                                        Showing {{ $sites->firstItem(). " - ". $sites->lastItem(). " of ". $sites->total() }}<br>
                                     </div>
                                     <div class=" no-print pull-right">
-                                        {{ $excavators->appends(Request::all())->links() }}
+                                        {{ $sites->appends(Request::all())->links() }}
                                     </div>
                                 @endif
                             </div>

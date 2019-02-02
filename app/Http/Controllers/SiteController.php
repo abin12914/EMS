@@ -33,9 +33,26 @@ class SiteController extends Controller
     public function index(SiteFilterRequest $request)
     {
         $noOfRecordsPerPage = $request->get('no_of_records') ?? config('settings.no_of_record_per_page');
-        //getSites($whereParams=[],$orWhereParams=[],$relationalParams=[],$orderBy=['by' => 'id', 'order' => 'asc', 'num' => null], $withParams=[],$activeFlag=true)
+
+        $whereParams = [
+            'site_type' => [
+                'paramName'     => 'site_type',
+                'paramOperator' => '=',
+                'paramValue'    => $request->get('site_type'),
+            ],
+            'site_id' => [
+                'paramName'     => 'id',
+                'paramOperator' => '=',
+                'paramValue'    => $request->get('site_id'),
+            ]
+        ];
+
+        $noOfRecordsPerPage = $request->get('no_of_records') ?? config('settings.no_of_record_per_page');
+        
         return view('sites.list', [
-            'sites'  => $this->siteRepo->getSites([], [], [], ['by' => 'id', 'order' => 'asc', 'num' => $noOfRecordsPerPage], [], [], true),
+            'sites'       => $this->siteRepo->getSites($whereParams, [], [], ['by' => 'id', 'order' => 'asc', 'num' => $noOfRecordsPerPage], [], [], true),
+            'siteTypes'   => config('constants.siteTypes'),
+            'params'      => $whereParams,
             'noOfRecords' => $noOfRecordsPerPage,
         ]);
     }
@@ -47,7 +64,9 @@ class SiteController extends Controller
      */
     public function create()
     {
-        return view('sites.register');
+        return view('sites.register', [
+            'siteTypes' => config('constants.siteTypes')
+        ]);
     }
 
     /**
@@ -69,15 +88,13 @@ class SiteController extends Controller
 
             //save site to table
             $siteResponse   = $this->siteRepo->saveSite([
-                'name'         => $request->get('name'),
-                'description'  => $request->get('description'),
-                'maker'        => $request->get('maker'),
-                'capacity'     => $request->get('capacity'),
-                'bucket_rate'  => $request->get('bucket_rate'),
-                'breaker_rate' => $request->get('breaker_rate'),
-                'status'       => 1,     
-                'created_by'   => $user->id,
-                'company_id'   => $user->company_id,
+                'name'       => $request->get('name'),
+                'place'      => $request->get('place'),
+                'address'    => $request->get('address'),
+                'site_type'  => $request->get('site_type'),
+                'status'     => 1,     
+                'created_by' => $user->id,
+                'company_id' => $user->company_id,
             ], $id);
 
             if(!$siteResponse['flag']) {
@@ -88,7 +105,7 @@ class SiteController extends Controller
 
             if(!empty($id)) {
                 return [
-                    'flag'    => true,
+                    'flag' => true,
                     'site' => $siteResponse['site']
                 ];
             }
@@ -154,7 +171,8 @@ class SiteController extends Controller
         }
 
         return view('sites.edit', [
-            'site' => $site,
+            'site'      => $site,
+            'siteTypes' => config('constants.siteTypes')
         ]);
     }
 

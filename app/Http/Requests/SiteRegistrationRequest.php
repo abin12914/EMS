@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class SiteRegistrationRequest extends FormRequest
 {
@@ -13,7 +14,7 @@ class SiteRegistrationRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,7 +25,26 @@ class SiteRegistrationRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'name'      =>  [
+                                'required',
+                                'min:3',
+                                'max:100',
+                                Rule::unique('sites')->ignore($this->site),
+                            ],
+            'place'     =>  [
+                                'required',
+                                'min:3',
+                                'max:100',
+                            ],
+            'address'   =>  [
+                                'required',
+                                'min:3',
+                                'max:200',
+                            ],
+            'site_type' =>  [
+                                'required',
+                                Rule::in(array_keys(config('constants.siteTypes'))),
+                            ],
         ];
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class SiteFilterRequest extends FormRequest
 {
@@ -13,7 +14,7 @@ class SiteFilterRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,7 +25,24 @@ class SiteFilterRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'site_type'     =>  [
+                                    'nullable',
+                                    Rule::in(array_keys(config('constants.siteTypes'))),
+                                ],
+            'site_id'       =>  [
+                                    'nullable',
+                                    'exists:sites,id',
+                                ],
+            'page'          =>  [
+                                    'nullable',
+                                    'integer',
+                                ],
+            'no_of_records' =>  [
+                                    'nullable',
+                                    'min:2',
+                                    'max:100',
+                                    'integer',
+                                ],
         ];
     }
 }
